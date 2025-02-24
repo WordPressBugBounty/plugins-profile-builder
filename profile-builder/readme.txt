@@ -4,7 +4,8 @@ Donate link: https://www.cozmoslabs.com/wordpress-profile-builder/
 Tags: user registration, user profile, registration, profile, user registration form
 Requires at least: 3.1
 Tested up to: 6.7
-Stable tag: 3.13.3
+Requires PHP: 7.4
+Stable tag: 3.13.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -203,6 +204,11 @@ This plugin adds/removes user fields in the front-end. Both default and extra pr
 17. Edit or Add New User Role
 
 == Changelog ==
+= 3.13.4 =
+* Feature: Added score threshold option to the reCaptcha v3 integration
+* Misc: Added a filter that can be used to remove unapproved users from the front-end admin Edit Other Users dropdown: wppb_edit_other_users_dropdown_user_list_excludes_admin_approval
+* Misc: When Login With is set to Email only, remove leading and trailing whitespace from the Email field on the Login form
+
 = 3.13.3 =
 * Fix: Issue with styling getting broken on the website generated with the latest update
 
