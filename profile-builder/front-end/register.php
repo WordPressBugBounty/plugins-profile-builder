@@ -10,9 +10,7 @@ function wppb_signup_password_random_password_filter( $password ) {
 	$key = ( !empty( $_GET['key'] ) ? sanitize_text_field( $_GET['key'] ) : null );
 	$key = ( !empty( $_POST['key'] ) ? sanitize_text_field( $_POST['key'] ) : $key );
 
-	if ( !empty( $_POST['user_pass'] ) )// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-		$password = $_POST['user_pass'];// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-	elseif ( !is_null( $key ) ) {
+    if ( !is_null( $key ) ) {
 		$signup = ( is_multisite() ? $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . $wpdb->signups . " WHERE activation_key = %s", $key ) ) : $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . $wpdb->base_prefix . "signups WHERE activation_key = %s", $key ) ) );
 		
 		if ( empty( $signup ) || $signup->active ) {
@@ -143,6 +141,7 @@ function wppb_activate_signup( $key ) {
                                     $redirect_url = wppb_curpageurl();
                                 }
                                 $redirect_message = wppb_activate_signup_autologin_redirect_url($user_id, $redirect_url, $redirect_delay);
+                                $redirect_message = apply_filters( 'wppb_ec_sucess_message_redirect', $redirect_message, $meta );
                             }
 
 							return $success_message . ( ! empty ( $redirect_message ) ? $redirect_message : '' );
@@ -160,6 +159,7 @@ function wppb_activate_signup( $key ) {
                         $redirect_url = wppb_curpageurl();
                     }
                     $redirect_message = wppb_activate_signup_autologin_redirect_url($user_id, $redirect_url, $redirect_delay);
+                    $redirect_message = apply_filters( 'wppb_ec_sucess_message_redirect', $redirect_message, $meta );
                 }
 
                 return $success_message . ( ! empty ( $redirect_message ) ? $redirect_message : '' );

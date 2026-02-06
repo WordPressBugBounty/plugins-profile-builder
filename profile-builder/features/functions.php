@@ -986,7 +986,7 @@ function wppb_enqueue_password_visibility_toggle() {
             function wppb_password_visibility_toggle() {
                 var target_form_id = "#" + jQuery(this).closest('form').attr("id") + " ";
 
-                var password_inputs = [ ".login-password input#user_pass", "input#passw1", "input#passw2" ]
+                var password_inputs = [ ".login-password input#wppb_user_pass", "input#passw1", "input#passw2" ]
 
                 for ( var password_input of password_inputs ){
                     var input = jQuery( target_form_id + password_input );
@@ -1056,7 +1056,14 @@ function wppb_get_field_by_id_or_meta( $id_or_meta ){
 
 /* Function for displaying reCAPTCHA error on Login and Recover Password forms */
 function wppb_recaptcha_field_error($field_title='') {
-    $recaptcha_error = apply_filters('wppb_recaptcha_error' , __('Please enter a (valid) reCAPTCHA value','profile-builder') , $field_title);
+
+    $recaptcha_field = wppb_get_recaptcha_field();
+
+    if( $recaptcha_field['recaptcha-type'] === 'v2' ) {
+        $recaptcha_error = apply_filters('wppb_recaptcha_error' , __('Please enter a (valid) reCAPTCHA value','profile-builder') , $field_title);
+    } else {
+        $recaptcha_error = apply_filters('wppb_recaptcha_error' , __('reCaptcha could not be verified. Please try again.','profile-builder') , $field_title);
+    }
 
     return $recaptcha_error;
 
@@ -1852,7 +1859,7 @@ function wppb_embed($atts, $content){
 	if(empty($atts['width']) || empty($atts['height'])){
 		$content = $wp_embed->run_shortcode('[embed]'.$content.'[/embed]');
 	} else {
-		$content = $wp_embed->run_shortcode('[embed width="'.$atts['width'].'" height="'.$atts['height'].'"]'.$content.'[/embed]');
+		$content = $wp_embed->run_shortcode('[embed width="'.esc_attr($atts['width']).'" height="'.esc_attr($atts['height']).'"]'.$content.'[/embed]');
 	}
 
 	return $content;

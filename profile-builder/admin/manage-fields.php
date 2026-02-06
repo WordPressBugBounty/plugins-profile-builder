@@ -184,7 +184,7 @@ function wppb_populate_manage_fields(){
 	// Free to Pro call to action on Manage Fields page
 	$field_description = __('Choose one of the supported field types','profile-builder');
 	if( PROFILE_BUILDER == 'Profile Builder Free' ) {
-		$field_description .= sprintf( __('. Extra Field Types are available in <a href="%s">Basic or PRO versions</a>.' , 'profile-builder'), esc_url( 'https://www.cozmoslabs.com/wordpress-profile-builder/?utm_source=wpbackend&utm_medium=clientsite&utm_content=manage-fields-link&utm_campaign=PBFree' ) );
+		$field_description .= sprintf( __('. Extra Field Types are available in <a href="%s">Basic or PRO versions</a>.' , 'profile-builder'), esc_url( 'https://www.cozmoslabs.com/wordpress-profile-builder/?utm_source=pb-form-fields&utm_medium=client-site&utm_campaign=pb-extra-fields#pricing' ) );
 	}
 
     //user roles
@@ -743,9 +743,27 @@ function wppb_country_select_options( $form_location ) {
 		)
 	);
 
-	return $country_array;
+	return wppb_translate_countries( $country_array );
 }
 
+/**
+ * Helper function to translate country names with WPML
+ * Registers strings in WPML String Translation and returns translated value
+ */
+function wppb_translate_countries( $countries ) {
+
+    if ( !function_exists( 'icl_register_string' ) || !function_exists( 'icl_t' ) ) {
+        return $countries;
+    }
+
+    foreach( $countries as $index => $country ){
+        $prefix = 'country_' . $country;
+        icl_register_string( 'profile-builder', $prefix, $country );
+        $countries[$index] = icl_t( 'profile-builder', $prefix, $country );
+    }
+
+    return $countries;
+}
 
 /**
  * Function that returns an array with timezone options

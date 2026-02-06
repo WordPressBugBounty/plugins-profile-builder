@@ -67,9 +67,9 @@
 <?php __("TranslatePress", "profile-builder"); ?>
 <?php __("Translate your Profile Builder forms with a WordPress translation plugin that anyone can use. It offers a simpler way to translate WordPress sites, with full support for WooCommerce and site builders.", "profile-builder"); ?>
 <?php __("Paid Member Subscriptions", "profile-builder"); ?>
-<?php __("Accept user payments, create subscription plans and restrict content on your membership site.", "profile-builder"); ?>
+<?php __("Unlock the Subscriptions Field in Profile Builder and offer paid memberships for your site. With Paid Member Subscriptions your registration forms will allow your users to sign up for paid accounts.", "profile-builder"); ?>
 <?php __("WP Webhooks Automations", "profile-builder"); ?>
-<?php __("Easily create powerful no-code automations that connect your WordPress plugins, sites and apps together.", "profile-builder"); ?>
+<?php __("Easily create powerful no-code automations that connect Profile Builder actions, like sign-ups or edits to a user's profile, to actions from other plugins, sites, and apps.", "profile-builder"); ?>
 <?php __("Client Portal", "profile-builder"); ?>
 <?php __("Create private pages for your website users that only an administrator can edit.", "profile-builder"); ?>
 <?php __("Custom Login Page Templates", "profile-builder"); ?>
@@ -182,7 +182,7 @@
 <?php __("It offers a simpler way to translate WordPress sites, with full support for WooCommerce and site builders.", "profile-builder"); ?>
 <?php __("Save time and money using automations", "profile-builder"); ?>
 <?php __("Create no-code automations and workflows on your WordPress site.", "profile-builder"); ?>
-<?php __("Integrates with Profile Builder or Paid Member Subscriptions, depending on which plugin it's for.", "profile-builder"); ?>
+<?php __("Integrates with both Profile Builder and Paid Member Subscriptions.", "profile-builder"); ?>
 <?php __("Dashboard", "profile-builder"); ?>
 <?php __("Setup Wizard", "profile-builder"); ?>
 <?php __("Totals", "profile-builder"); ?>
@@ -270,6 +270,31 @@
 <?php __("Password Recovery Page", "profile-builder"); ?>
 <?php __("None", "profile-builder"); ?>
 <?php __("Select the page which contains the \"[wppb-recover-password]\" shortcode.", "profile-builder"); ?>
+<?php __("Two-Factor Authentication", "profile-builder"); ?>
+<?php __("Enable the Google Authenticator functionality.", "profile-builder"); ?>
+<?php __('Increase the security of your user accounts with 2 Factor Authentication by upgrading to %1$sBasic or Pro%2$s versions.', 'profile-builder' ); ?>
+<?php __("Confirm Two-Factor Authentication Enforcement", "profile-builder"); ?>
+<?php __("Cancel", "profile-builder"); ?>
+<?php __("Confirm & Save", "profile-builder"); ?>
+<?php __("You are enforcing 2FA for the following user roles:", "profile-builder"); ?>
+<?php __("Users with these roles will be required to set up 2FA on their next login.", "profile-builder"); ?>
+<?php __("Warning:", "profile-builder"); ?>
+<?php __("Based on the configured settings, your account is also required to set up 2FA. Once you confirm this change, you will be redirected to set it up.", "profile-builder"); ?>
+<?php __("Require TOTP Verification on Profile Edit", "profile-builder"); ?>
+<?php __("Require users with Two-Factor Authentication enabled to verify their TOTP code every time they edit their profile. This setting is enabled by default.", "profile-builder"); ?>
+<?php __("Enable Authenticator For", "profile-builder"); ?>
+<?php __("ALL ROLES", "profile-builder"); ?>
+<?php __("\"ALL ROLES\" - Two-Factor Authentication will be enabled for all user roles.", "profile-builder"); ?>
+<?php __("Force 2FA for Selected Roles", "profile-builder"); ?>
+<?php __("Force users with selected roles to set up Two-Factor Authentication. Users will be redirected to their profile page if 2FA is not configured.", "profile-builder"); ?>
+<?php __("Force 2FA For", "profile-builder"); ?>
+<?php __("Select which user roles will be forced to set up Two-Factor Authentication. Only roles that have 2FA enabled above are available.", "profile-builder"); ?>
+<?php __("Grace Period", "profile-builder"); ?>
+<?php __("Number of days users have to set up Two-Factor Authentication. Set to 0 for immediate enforcement.", "profile-builder"); ?>
+<?php __("Redirect to Edit Profile Page", "profile-builder"); ?>
+<?php __("Admin Profile Page", "profile-builder"); ?>
+<?php __("Select which page users should be redirected to when they need to set up Two-Factor Authentication.", "profile-builder"); ?>
+<?php __("No pages with Edit Profile forms found. Please create a page with the [wppb-edit-profile] shortcode or block.", "profile-builder"); ?>
 <?php __("Other features", "profile-builder"); ?>
 <?php __("Hide Admin Bar for User Roles", "profile-builder"); ?>
 <?php __("All User Roles", "profile-builder"); ?>
@@ -277,12 +302,6 @@
 <?php __("Hide the WordPress Admin Bar for these user roles. You can select multiple roles to hide it for.", "profile-builder"); ?>
 <?php __("Easily create new custom user roles or customize any existing user role capabilities.", "profile-builder"); ?>
 <?php __('You can add / edit user roles at %1$sUsers > Roles Editor%2$s.', 'profile-builder' ); ?>
-<?php __("Two-Factor Authentication", "profile-builder"); ?>
-<?php __("Enable the Google Authenticator functionality.", "profile-builder"); ?>
-<?php __('Increase the security of your user accounts with 2 Factor Authentication by upgrading to %1$sBasic or Pro%2$s versions.', 'profile-builder' ); ?>
-<?php __("Enable Authenticator For", "profile-builder"); ?>
-<?php __("ALL ROLES", "profile-builder"); ?>
-<?php __("\"ALL ROLES\" - Two-Factor Authentication will be enabled for all user roles.", "profile-builder"); ?>
 <?php __("Load CSS", "profile-builder"); ?>
 <?php __('You can find the default file here: %1$s', 'profile-builder' ); ?>
 <?php __("Update Settings", "profile-builder"); ?>
@@ -935,9 +954,9 @@
 <?php __("Show password", "profile-builder"); ?>
 <?php __("Hide password", "profile-builder"); ?>
 <?php __("This field is required", "profile-builder"); ?>
+<?php __("reCaptcha could not be verified. Please try again.", "profile-builder"); ?>
 <?php __("Please enter a (valid) reCAPTCHA value", "profile-builder"); ?>
 <?php __("Incorrect phone number", "profile-builder"); ?>
-<?php __("Cancel", "profile-builder"); ?>
 <?php __("Content", "profile-builder"); ?>
 <?php __("<br><br>Also, you will be able to visit your site at ", "profile-builder"); ?>
 <?php __("<br><br>You can visit your site at ", "profile-builder"); ?>
@@ -979,10 +998,11 @@
 <?php __("ERROR: ", "profile-builder"); ?>
 <?php __('You need to confirm your Email Address before logging in! </br>To resend the Confirmation Email  %1$sclick here%2$s.', 'profile-builder' ); ?>
 <?php __("The password field is empty.", "profile-builder"); ?>
-<?php __("The password you entered is incorrect.", "profile-builder"); ?>
 <?php __("The username field is empty", "profile-builder"); ?>
 <?php __("The username/email field is empty", "profile-builder"); ?>
 <?php __("The email field is empty.", "profile-builder"); ?>
+<?php __("The credentials you entered are incorrect.", "profile-builder"); ?>
+<?php __("The password you entered is incorrect.", "profile-builder"); ?>
 <?php __("Invalid username.", "profile-builder"); ?>
 <?php __("Invalid username or email.", "profile-builder"); ?>
 <?php __("Invalid email.", "profile-builder"); ?>
@@ -999,7 +1019,7 @@
 <?php __("Please enter your username or email address.", "profile-builder"); ?>
 <?php __("Please enter your email address.", "profile-builder"); ?>
 <?php __("You will receive a link to create a new password via email.", "profile-builder"); ?>
-<?php __("Get New Password", "profile-builder"); ?>
+<?php __("Get Reset Link", "profile-builder"); ?>
 <?php __('Someone requested that the password be reset for the following account: <b>%1$s</b><br/>If this was a mistake, just ignore this email and nothing will happen.<br/>To reset your password, visit the following link:%2$s', 'profile-builder' ); ?>
 <?php __('Password Reset from %1$s', 'profile-builder' ); ?>
 <?php __("You have successfully reset your password.", "profile-builder"); ?>
@@ -1013,6 +1033,7 @@
 <?php __("The entered passwords don't match!", "profile-builder"); ?>
 <?php __("The password must have the minimum length of %s characters", "profile-builder"); ?>
 <?php __("Your password has been successfully changed!", "profile-builder"); ?>
+<?php __("If your information matches an account, a confirmation link will be sent to your email address.", "profile-builder"); ?>
 <?php __("The email/username entered wasn't found in the database!", "profile-builder"); ?>
 <?php __("Please check that you entered the correct email/username.", "profile-builder"); ?>
 <?php __("The username entered wasn't found in the database!", "profile-builder"); ?>
@@ -1023,7 +1044,7 @@
 <?php __("Please check that you entered the correct email address.", "profile-builder"); ?>
 <?php __("Check your email for the confirmation link.", "profile-builder"); ?>
 <?php __("ERROR:", "profile-builder"); ?>
-<?php __('There was an error while trying to send the activation link to %1$s!', 'profile-builder' ); ?>
+<?php __("There was an error while trying to send the activation link!", "profile-builder"); ?>
 <?php __("Could not find registration. Contact administrator.", "profile-builder"); ?>
 <?php __("Invalid activation key!", "profile-builder"); ?>
 <?php __("This username is now active!", "profile-builder"); ?>
@@ -1041,13 +1062,25 @@
 <?php __("After Password Change Request", "profile-builder"); ?>
 <?php __("After Successful Password Reset", "profile-builder"); ?>
 <?php __("Dashboard (redirect users from accessing the dashboard)", "profile-builder"); ?>
+<?php __("PMS: Subscription Activated", "profile-builder"); ?>
+<?php __("PMS: Subscription Cancelled", "profile-builder"); ?>
+<?php __("PMS: Subscription Abandoned", "profile-builder"); ?>
+<?php __("PMS: Subscription Renewed", "profile-builder"); ?>
+<?php __("PMS: Subscription Upgraded", "profile-builder"); ?>
+<?php __("PMS: Subscription Downgraded", "profile-builder"); ?>
+<?php __("PMS: Subscription Changed", "profile-builder"); ?>
+<?php __("PMS: Login with Active Subscription", "profile-builder"); ?>
+<?php __("PMS: Login with Expired Subscription", "profile-builder"); ?>
+<?php __("PMS: Login with Cancelled Subscription", "profile-builder"); ?>
+<?php __("PMS: Login with Pending Subscription", "profile-builder"); ?>
+<?php __("PMS: Login with No Subscription", "profile-builder"); ?>
 <?php __("User ID", "profile-builder"); ?>
+<?php __("Can contain the following dynamic tags: {{homeurl}}, {{siteurl}}, {{user_id}}, {{user_nicename}}, {{http_referer}}, and more.", "profile-builder"); ?>
 <?php __("User ID or Username", "profile-builder"); ?>
 <?php __("User ID / Username", "profile-builder"); ?>
 <?php __("Please select and enter the ID or username of your user.", "profile-builder"); ?>
 <?php __("Redirect Type", "profile-builder"); ?>
 <?php __("Redirect URL", "profile-builder"); ?>
-<?php __("Can contain the following dynamic tags:{{homeurl}}, {{siteurl}}, {{user_id}}, {{user_nicename}}, {{http_referer}}", "profile-builder"); ?>
 <?php __("Individual User Redirects", "profile-builder"); ?>
 <?php __("... Choose", "profile-builder"); ?>
 <?php __("User Role", "profile-builder"); ?>
@@ -1060,23 +1093,54 @@
 <?php __("Author Archive ( http://sitename.com/author/admin )", "profile-builder"); ?>
 <?php __("Default WordPress Forms and Pages", "profile-builder"); ?>
 <?php __("How does this work?", "profile-builder"); ?>
+<?php __("...Choose", "profile-builder"); ?>
+<?php __("Any Plan", "profile-builder"); ?>
+<?php __("Subscription Plan", "profile-builder"); ?>
+<?php __("Select a subscription plan.", "profile-builder"); ?>
+<?php __("Subscription Plan based Redirects", "profile-builder"); ?>
 <?php __("<pre>User ID / Username</pre><pre>Redirect</pre><pre>URL</pre>", "profile-builder"); ?>
 <?php __("<pre>User Role</pre><pre>Redirect</pre><pre>URL</pre>", "profile-builder"); ?>
 <?php __("<pre>Redirect</pre><pre>URL</pre>", "profile-builder"); ?>
+<?php __("<pre>Subscription Plan</pre><pre>Redirect</pre><pre>URL</pre>", "profile-builder"); ?>
 <?php __("These redirects happen after a successful action, like registration or after a successful login.", "profile-builder"); ?>
 <?php __("Which redirect happens depends on the following priority", "profile-builder"); ?>
 <?php __("Multiple Registration and Edit Profile form settings Redirects", "profile-builder"); ?>
 <?php __("Individual redirects defined in shortcodes; <strong><em>redirect_priority=\"top\"</em></strong> parameter can be added in any shortcode, then that shortcode redirect will have priority over all other redirects.", "profile-builder"); ?>
 <?php __("Redirect Default WordPress forms and pages", "profile-builder"); ?>
 <?php __("With these you can redirect various WordPress forms and pages to pages created with profile builder.", "profile-builder"); ?>
+<?php __("These redirects work with the Paid Member Subscriptions plugin. They allow you to redirect users based on the subscription plan they select during registration or checkout.", "profile-builder"); ?>
+<?php __("Any Plan option:", "profile-builder"); ?>
+<?php __("Select 'Any Plan' to create a redirect that triggers for any subscription plan, regardless of which specific plan the user has.", "profile-builder"); ?>
+<?php __("PMS Subscription Status Redirects", "profile-builder"); ?>
+<?php __("These redirects are triggered automatically when a user's subscription status changes or when they login. They work with all redirect types (Individual User, User Role, Global).", "profile-builder"); ?>
+<?php __("Status Change Redirects:", "profile-builder"); ?>
+<?php __("When a pending subscription becomes active", "profile-builder"); ?>
+<?php __("When a subscription is cancelled", "profile-builder"); ?>
+<?php __("When a subscription is abandoned", "profile-builder"); ?>
+<?php __("When an expired or cancelled subscription is renewed", "profile-builder"); ?>
+<?php __("When a subscription is upgraded", "profile-builder"); ?>
+<?php __("When a subscription is downgraded", "profile-builder"); ?>
+<?php __("When a subscription is changed", "profile-builder"); ?>
+<?php __("Login Status Redirects:", "profile-builder"); ?>
+<?php __("When a user with an active subscription logs in", "profile-builder"); ?>
+<?php __("When a user with an expired subscription logs in", "profile-builder"); ?>
+<?php __("When a user with a cancelled subscription logs in", "profile-builder"); ?>
+<?php __("When a user with a pending subscription logs in", "profile-builder"); ?>
+<?php __("When a user with no subscription logs in", "profile-builder"); ?>
 <?php __("Available tags for dynamic URLs", "profile-builder"); ?>
 <?php __("You use the following tags in your URLs to redirect users to various pages.", "profile-builder"); ?>
+<?php __("Standard Tags:", "profile-builder"); ?>
 <?php __("generates a url of the current website homepage.", "profile-builder"); ?>
 <?php __("in WordPress the <a target='_blank' href='https://codex.wordpress.org/Function_Reference/site_url'>site url</a> can be different then the home url", "profile-builder"); ?>
 <?php __("the ID of the user", "profile-builder"); ?>
 <?php __("the URL sanitized version of the username, the user nicename can be safely used in URLs since it can't contain special characters or spaces.", "profile-builder"); ?>
 <?php __("the URL of the previously visited page", "profile-builder"); ?>
 <?php __("the default URL set by WordPress after login", "profile-builder"); ?>
+<?php __("PMS Subscription Tags:", "profile-builder"); ?>
+<?php __("the name of the user's subscription plan", "profile-builder"); ?>
+<?php __("the ID of the user's subscription plan", "profile-builder"); ?>
+<?php __("the current status of the subscription (active, expired, cancelled, etc.)", "profile-builder"); ?>
+<?php __("the price of the subscription plan", "profile-builder"); ?>
 <?php __("You can't add duplicate redirects!", "profile-builder"); ?>
 <?php __("Edit-profile Form", "profile-builder"); ?>
 <?php __("Add New", "profile-builder"); ?>
@@ -1480,6 +1544,7 @@
 <?php __("Country", "profile-builder"); ?>
 <?php __("Company Name", "profile-builder"); ?>
 <?php __("Address", "profile-builder"); ?>
+<?php __("Address 2", "profile-builder"); ?>
 <?php __("Town / City", "profile-builder"); ?>
 <?php __("State / County", "profile-builder"); ?>
 <?php __("Postcode / Zip", "profile-builder"); ?>
@@ -1642,6 +1707,8 @@
 <?php __("Password reset", "profile-builder"); ?>
 <?php __("A simple form where users can reset their password in case they forgot it.", "profile-builder"); ?>
 <?php __("Your account has to be confirmed by an administrator before you can log in.", "profile-builder"); ?>
+<?php __("pending", "profile-builder"); ?>
+<?php __("unapproved", "profile-builder"); ?>
 <?php __("Do you want to", "profile-builder"); ?>
 <?php __("Your session has expired! Please refresh the page and try again.", "profile-builder"); ?>
 <?php __("You either don't have permission for that action or there was an error!", "profile-builder"); ?>
@@ -1652,7 +1719,6 @@
 <?php __("Users successfully unapproved!", "profile-builder"); ?>
 <?php __("Users successfully approved!", "profile-builder"); ?>
 <?php __('Your account on %1$s has been unapproved!', 'profile-builder' ); ?>
-<?php __("unapproved", "profile-builder"); ?>
 <?php __('An administrator has just unapproved your account on %1$s (%2$s).', 'profile-builder' ); ?>
 <?php __('Your account on %1$s has been approved!', 'profile-builder' ); ?>
 <?php __("approved", "profile-builder"); ?>
@@ -1896,6 +1962,15 @@
 <?php __("Edit User Roles", "profile-builder"); ?>
 <?php __("Valid", "profile-builder"); ?>
 <?php __("Invalid", "profile-builder"); ?>
+<?php __("Backup Codes", "profile-builder"); ?>
+<?php __("Regenerate Backup Codes", "profile-builder"); ?>
+<?php __("Copy Codes", "profile-builder"); ?>
+<?php __("Download Codes", "profile-builder"); ?>
+<?php __("Regenerating will invalidate all existing codes. Continue?", "profile-builder"); ?>
+<?php __("Each code can only be used once. Please save these codes in a secure location.", "profile-builder"); ?>
+<?php __("remaining codes", "profile-builder"); ?>
+<?php __("Two-Factor Authentication is required for your role. Please set it up now.", "profile-builder"); ?>
+<?php __("You must set up Two-Factor Authentication within %d days. Your role requires 2FA for security.", "profile-builder"); ?>
 <?php __("Relaxed Mode", "profile-builder"); ?>
 <?php __("Allow for more time drift on your phone clock ( &#177;4 min ).", "profile-builder"); ?>
 <?php __("Description that you'll see in the Authenticator app.", "profile-builder"); ?>
@@ -1905,14 +1980,30 @@
 <?php __("Scan this with the Authenticator app:", "profile-builder"); ?>
 <?php __("Verify TOTP", "profile-builder"); ?>
 <?php __("Check", "profile-builder"); ?>
+<?php __("%d remaining codes", "profile-builder"); ?>
+<?php __("No remaining codes!", "profile-builder"); ?>
+<?php __("%d remaining codes!", "profile-builder"); ?>
 <?php __("Two-Factor Authentication Settings", "profile-builder"); ?>
 <?php __("Description that you'll see in the Authenticator app on your phone.", "profile-builder"); ?>
 <?php __("Create new secret", "profile-builder"); ?>
 <?php __("Show/Hide QR code", "profile-builder"); ?>
+<?php __("Two-Factor Authentication is required for your role. Please enable it.", "profile-builder"); ?>
+<?php __("You cannot disable Two-Factor Authentication as it is required for your role.", "profile-builder"); ?>
+<?php __("Two-Factor Authentication has been successfully set up!", "profile-builder"); ?>
+<?php __("Continue to your destination", "profile-builder"); ?>
+<?php __("Please verify TOTP to edit your profile.", "profile-builder"); ?>
 <?php __("Please verify TOTP to change Two-Factor Authentication settings", "profile-builder"); ?>
+<?php __("Please verify TOTP to set up Two-Factor Authentication", "profile-builder"); ?>
 <?php __("Please enter the code from your Authenticator app.", "profile-builder"); ?>
 <?php __("Your Authenticator code was incorrect. Please try again.", "profile-builder"); ?>
-<?php __("Authenticator Code", "profile-builder"); ?>
+<?php __("Authentication Code", "profile-builder"); ?>
+<?php __("Enter your 6-digit authenticator code or 16-digit backup code.", "profile-builder"); ?>
+<?php __("Your role requires Two-Factor Authentication. Please set it up immediately.", "profile-builder"); ?>
+<?php __("Your role requires Two-Factor Authentication. You have %d days remaining to set it up.", "profile-builder"); ?>
+<?php __("Set up 2FA Now", "profile-builder"); ?>
+<?php __("User not logged in.", "profile-builder"); ?>
+<?php __("Please wait before regenerating backup codes again.", "profile-builder"); ?>
+<?php __("Backup codes generated", "profile-builder"); ?>
 <?php __("The usernames cannot be changed.", "profile-builder"); ?>
 <?php __("This Profile Builder add-on has been migrated to the main plugin and is no longer used. You can delete it.", "profile-builder"); ?>
 <?php __("ERROR", "profile-builder"); ?>
@@ -2197,7 +2288,6 @@
 <?php __('Value must be greater than or equal to %1$s', 'profile-builder' ); ?>
 <?php __('Value must be less than or equal to %1$s', 'profile-builder' ); ?>
 <?php __("Required phone number format: ", "profile-builder"); ?>
-<?php __("...Choose", "profile-builder"); ?>
 <?php __("This display name is already in use. Please choose another one.", "profile-builder"); ?>
 <?php __("Email address change request for %s", "profile-builder"); ?>
 <?php __('Someone requested to change the email address for your account.<br/>If this was a mistake, just ignore this email and nothing will happen.<br/>To update your account email address to the one requested (%1$s), visit the following link: %2$s', 'profile-builder' ); ?>
@@ -2339,10 +2429,11 @@
 <?php __("Last Login Usermeta", "profile-builder"); ?>
 <?php __("Save \"Last Login\" date in usermeta.", "profile-builder"); ?>
 <?php __("By enabling this option, each time a user logins, the date and time will be saved in the database under the \"last_login_date\" meta name.", "profile-builder"); ?>
-<?php __("You can <a href=\"https://www.cozmoslabs.com/docs/profile-builder/manage-user-fields/#Manage_existing_custom_fields_with_Profile_Builder\" target=\"_blank\">create a field with this meta name</a> to display it in the Userlisting or Edit Profile forms.", "profile-builder"); ?>
+<?php __("You can <a href=\"https://www.cozmoslabs.com/docs/profile-builder/manage-user-fields/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-last-login#Manage_existing_custom_fields_with_Profile_Builder\" target=\"_blank\">create a field with this meta name</a> to display it in the Userlisting or Edit Profile forms.", "profile-builder"); ?>
 <?php __("Last Profile Update Usermeta", "profile-builder"); ?>
 <?php __("Save \"Last Profile Update\" date in usermeta.", "profile-builder"); ?>
 <?php __("By enabling this option, each time a user modifies his profile the date and time will be saved in the database under the \"last_profile_update_date\" meta name.", "profile-builder"); ?>
+<?php __("You can <a href=\"https://www.cozmoslabs.com/docs/profile-builder/manage-user-fields/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-last-profile-update#Manage_existing_custom_fields_with_Profile_Builder\" target=\"_blank\">create a field with this meta name</a> to display it in the Userlisting or Edit Profile forms.", "profile-builder"); ?>
 <?php __("Disable Automatic Scrolling", "profile-builder"); ?>
 <?php __("Disable automatic scrolling after submit.", "profile-builder"); ?>
 <?php __("By default, after each form submission the page will automatically scroll to the form message. By enabling this option, automatic scrolling will be disabled.", "profile-builder"); ?>
@@ -2360,19 +2451,19 @@
 <?php __("Reset All Color Settings", "profile-builder"); ?>
 <?php __("Compare Shortcode", "profile-builder"); ?>
 <?php __("Enable Compare shortcode.", "profile-builder"); ?>
-<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/compare-shortcode/?utm_source=wpbackend&utm_medium=advanced-settings-shortcodes&utm_campaign=PBDocs\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
+<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/compare-shortcode/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-compare-shortcode\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
 <?php __("Usermeta Shortcode", "profile-builder"); ?>
 <?php __("Enable Usermeta shortcode.", "profile-builder"); ?>
-<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/display-user-meta/?utm_source=wpbackend&utm_medium=advanced-settings-shortcodes&utm_campaign=PBDocs\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
+<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/display-user-meta/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-usermeta-shortcode \" target=\"_blank\">this url</a>.", "profile-builder"); ?>
 <?php __("Resend Activation Email Shortcode", "profile-builder"); ?>
 <?php __("Enable Resend Activation Email shortcode.", "profile-builder"); ?>
-<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/resend-confirmation-email/?utm_source=wpbackend&utm_medium=advanced-settings-shortcodes&utm_campaign=PBDocs\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
+<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/resend-confirmation-email/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-resend-activation-shortcode\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
 <?php __("Format Date Shortcode", "profile-builder"); ?>
 <?php __("Enable Format Date shortcode.", "profile-builder"); ?>
-<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/format-date-shortcode/?utm_source=wpbackend&utm_medium=advanced-settings-shortcodes&utm_campaign=PBDocs\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
+<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/developers-knowledge-base/shortcodes/format-date-shortcode/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-format-date-shortcode\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
 <?php __("List Roles shortcode", "profile-builder"); ?>
 <?php __("Enable List Roles shortcode.", "profile-builder"); ?>
-<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/shortcodes/?utm_source=wpbackend&utm_medium=advanced-settings-shortcodes&utm_campaign=PBDocs/#Shortcodes_List\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
+<?php __("You can read more info about this shortcode by following <a href=\"https://www.cozmoslabs.com/docs/profile-builder/general-settings/advanced-settings/?utm_source=pb-advanced-settings&utm_medium=client-site&utm_campaign=pb-list-roles-shortcode/#Shortcodes\" target=\"_blank\">this url</a>.", "profile-builder"); ?>
 <?php __("Search Box Placeholder", "profile-builder"); ?>
 <?php __("This refers to the placeholder text from the \"{{{extra_search_all_fields}}}\" tag.", "profile-builder"); ?>
 <?php __("Default text is \"Search Users by All Fields\", use this option to change it to something else. Leave empty if you do not want to change it.", "profile-builder"); ?>
