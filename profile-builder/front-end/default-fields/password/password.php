@@ -167,10 +167,8 @@ function wppb_password_add_current_password_error_class( $classes, $field ) {
 
 	$user_id = get_current_user_id();
 
-	if ( ( ! is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && ( current_user_can( 'remove_users' ) || current_user_can( 'manage_options' ) ) ) ) {
-		if ( ! empty( $_REQUEST['edit_user'] ) ) {
-			$user_id = absint( $_REQUEST['edit_user'] );
-		}
+	if ( ! empty( $_REQUEST['edit_user'] ) && wppb_current_user_can_edit_other_user( $_REQUEST['edit_user'] ) ) {
+		$user_id = absint( $_REQUEST['edit_user'] );
 	}
 
 	if ( wppb_password_has_current_password_error( $field, 'edit_profile', $_REQUEST, $user_id ) ) {

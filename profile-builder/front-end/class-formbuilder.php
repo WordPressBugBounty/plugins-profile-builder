@@ -548,7 +548,7 @@ class Profile_Builder_Form_Creator{
 				?>
                 <?php do_action( 'wppb_form_before_submit_button', $this->args ); ?>
 				<input name="<?php echo esc_attr( $this->args['form_type'] ); ?>" type="submit" id="<?php echo esc_attr( $this->args['form_type'] ); ?>" class="<?php echo esc_attr( apply_filters( 'wppb_'. $this->args['form_type'] .'_submit_class', "submit button" ) );?>" value="<?php echo esc_attr( apply_filters( 'wppb_'. $this->args['form_type'] .'_button_name', $button_name, $this->args['form_name'] ) ); ?>" <?php echo apply_filters( 'wppb_form_submit_button_extra_attributes', '', $this->args['form_type'] ); /* phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped */  /* properly escaped when created */?>/>
-                <input name="redirect_to" type="hidden" value="<?php echo esc_attr( $this->args['redirect_url'] ); ?>" />
+                <input name="redirect_to" type="hidden" value="<?php echo esc_url( $this->args['redirect_url'] ); ?>" />
                 <?php do_action( 'wppb_form_after_submit_button', $this->args ); ?>
 				<input name="action" type="hidden" id="action" value="<?php echo esc_attr( $this->args['form_type'] ); ?>" />
 				<input name="form_name" type="hidden" id="form_name" value="<?php echo esc_attr( $this->args['form_name'] ); ?>" />
@@ -816,11 +816,8 @@ class Profile_Builder_Form_Creator{
      */
 	function wppb_get_desired_user_id(){
 		if( $this->args['form_type'] == 'edit_profile' ){
-			//only admins
-            if( ( !is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && ( current_user_can( 'remove_users' ) || current_user_can( 'manage_options' ) ) ) ){
-				if( isset( $_GET['edit_user'] ) && ! empty( $_GET['edit_user'] ) ){
-					return absint( $_GET['edit_user'] );
-				}
+			if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( $_GET['edit_user'] ) ){
+				return absint( $_GET['edit_user'] );
 			}
 		}
 
@@ -849,6 +846,9 @@ class Profile_Builder_Form_Creator{
             'role__not_in' => array( 'administrator' ),
             'orderby'      => array( 'display_name', 'user_login' ),
         );
+
+        if( is_multisite() && ! is_super_admin() )
+            $query_args['login__not_in'] = get_super_admins();
 
         $users = get_users( apply_filters( 'wppb_edit_other_users_dropdown_query_args', $query_args, $form_name ) );
 

@@ -194,6 +194,15 @@ function wppb_front_end_register( $atts ){
         'ajax'                => false
 	), $atts, 'wppb-register' );
 
+	/* every builder (shortcode, block, Elementor, Divi) renders post content through here, so the post author decides what the form may do */
+	if( doing_filter( 'the_content' ) ){
+		if( ! wppb_register_form_author_can_publish( get_the_ID() ) )
+			return wppb_register_form_author_not_allowed_message();
+
+		if( ! wppb_register_form_author_can_assign_role( get_the_ID(), $atts['role'] ) )
+			$atts['role'] = get_option( 'default_role' );
+	}
+
     $form = new Profile_Builder_Form_Creator( array( 'form_type' => 'register', 'form_name' => $atts['form_name'], 'role' => ( is_object( get_role( $atts['role'] ) ) ? $atts['role'] : get_option( 'default_role' ) ) , 'redirect_url' => $atts['redirect_url'], 'logout_redirect_url' => $atts['logout_redirect_url'], 'automatic_login' => $atts['automatic_login'], 'redirect_priority' => $atts['redirect_priority'], 'ajax' => $atts['ajax'] ) );
 
     return $form;
@@ -212,24 +221,6 @@ function wppbc_disable_admin_approval_for_user_role( $user_id ) {
 	}
 }
 
-/* authors and contributors shouldn't be allowed to create pages with the register shortcode in them */
-add_filter( 'the_content', 'wppb_maybe_remove_register_shortcode' );
-function wppb_maybe_remove_register_shortcode( $content ){
-	if ( has_shortcode( $content, 'wppb-register' ) ){
-		$author_id = get_the_author_meta( 'ID' );
-		if( !empty( $author_id ) ){
-			if( !user_can( $author_id, 'edit_others_posts' ) ) {
-				remove_shortcode('wppb-register');
-
-				$content = str_replace('[wppb-register]', __( 'Only an administrator can create pages with the register shortcode.', 'profile-builder' ), $content);
-			}
-		}
-	}
-
-	return $content;
-}
-
-/* the register block and Elementor widget render outside the shortcode check above, so they apply the same rule to the post they live in */
 function wppb_register_form_author_can_publish( $post_id ){
 	$post = get_post( $post_id );
 
@@ -237,6 +228,20 @@ function wppb_register_form_author_can_publish( $post_id ){
 		return true;
 
 	return user_can( $post->post_author, 'edit_others_posts' );
+}
+
+/* a role set in post content can't grant capabilities its author doesn't have, unless the author can change user roles anyway */
+function wppb_register_form_author_can_assign_role( $post_id, $role ){
+	$post        = get_post( $post_id );
+	$role_object = get_role( $role );
+
+	if( empty( $post ) || empty( $post->post_author ) || empty( $role_object ) || user_can( $post->post_author, 'promote_users' ) )
+		return true;
+
+	/* compare granted capabilities, since user_can() maps some (like manage_links) to do_not_allow regardless of role */
+	$author = get_userdata( $post->post_author );
+
+	return ! empty( $author ) && empty( array_diff_key( array_filter( $role_object->capabilities ), array_filter( $author->allcaps ) ) );
 }
 
 function wppb_register_form_author_not_allowed_message(){

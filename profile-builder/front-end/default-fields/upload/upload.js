@@ -156,7 +156,10 @@ jQuery(document).ready(function(){
 });
 
 function validate_simple_upload(){
-    jQuery("input:file").on('change', function(e){
+    /* This function is called again whenever new file inputs show up (repeater groups, AJAX forms,
+       popups, conditional fields). Unbind first so existing inputs don't get a duplicate handler,
+       which would upload the file twice and leave the submit button stuck on "Uploading file..." */
+    jQuery("input:file").off('change.wppbSimpleUpload').on('change.wppbSimpleUpload', function(e){
         //handle simple upload
         var uploadInputName = jQuery(this).attr('name');
         var uploadButton = jQuery(this);
@@ -237,8 +240,15 @@ function validate_simple_upload(){
                 });
 
                 var submitAlreadyDisabled = false;
-                var submitButtonText = uploadButton.closest('.wppb-user-forms').find('.submit.button').val();
-                jQuery("input#"+fieldName).closest('.wppb-user-forms').find('.submit.button').val( 'Uploading file...' );
+                var submitButton = uploadButton.closest('.wppb-user-forms').find('.submit.button');
+                /* store the original label only when no other upload is running, so a second upload
+                   can't capture "Uploading file..." as the text to restore */
+                var pendingUploads = submitButton.data( 'wppb-pending-uploads' ) || 0;
+                if ( pendingUploads === 0 ) {
+                    submitButton.data( 'wppb-original-text', submitButton.val() );
+                }
+                submitButton.data( 'wppb-pending-uploads', pendingUploads + 1 );
+                submitButton.val( 'Uploading file...' );
                 if ( jQuery( 'p.form-submit .submit.button' ).prop( 'disabled' ) ) {
                     submitAlreadyDisabled = true;
                 } else {
@@ -252,24 +262,42 @@ function validate_simple_upload(){
                     processData: false,
                     data: formData,
                     success: function(response){
-                        var parsed = JSON.parse(response);
+                        var parsed;
+                        try {
+                            parsed = JSON.parse(response);
+                        } catch ( err ) {
+                            parsed = null;
+                        }
 
-                        if ( parsed && parsed.errors ) {
-                            jQuery("input#"+fieldName).val(null);
-                            jQuery('.wppb_simple_upload', jQuery("input#"+fieldName).parent()).val(null);
+                        if ( !parsed || parsed.errors ) {
+                            clearUpload();
                         } else {
                             jQuery("input#"+fieldName).val(parsed);
                         }
-
+                    },
+                    error: function(){
+                        clearUpload();
+                    },
+                    /* restore the form in every case, otherwise a failed request leaves it unusable */
+                    complete: function(){
                         if ( !submitAlreadyDisabled ) {
                             jQuery("p.form-submit .submit.button").prop('disabled', false);
                         }
                         simpleUploadFields.each(function() {
                             jQuery( this ).prop( 'disabled', false );
                         });
-                        jQuery("input#"+fieldName).closest('.wppb-user-forms').find('.submit.button').val( submitButtonText );
+                        var stillPending = ( submitButton.data( 'wppb-pending-uploads' ) || 1 ) - 1;
+                        submitButton.data( 'wppb-pending-uploads', stillPending );
+                        if ( stillPending === 0 ) {
+                            submitButton.val( submitButton.data( 'wppb-original-text' ) );
+                        }
                     },
                 });
+
+                function clearUpload(){
+                    jQuery("input#"+fieldName).val(null);
+                    jQuery('.wppb_simple_upload', jQuery("input#"+fieldName).parent()).val(null);
+                }
             }
         };
     });

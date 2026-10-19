@@ -5,7 +5,7 @@ Tags: user registration, user profile, registration, profile, user registration 
 Requires at least: 3.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 4.0.4
+Stable tag: 4.0.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -216,15 +216,14 @@ Privacy Policy: https://www.cozmoslabs.com/privacy-policy/
 17. Edit or Add New User Role
 
 == Changelog ==
-= 4.0.4 =
-* Fix: Security issue regarding stored cross-site scripting through signup details on the Unconfirmed Emails list. Thanks to whale120 and the Wordfence team
-* Fix: Security issue where a Select (User Role) field saved with no roles list accepted a posted role. Thanks to Supakiad S. and the Wordfence team
-* Fix: Security issue where a legacy field with the meta name "role" could choose the role assigned when Email Confirmation activates the account. Thanks to Supakiad S. and the Wordfence team
-* Fix: Security issue regarding the avatar image built from the display name. Thanks to UKO and the Wordfence team for the report
-* Fix: The Register block and Elementor registration widget now hide the form on posts written by Authors or Contributors, matching the register shortcode. Thanks to pb>sec (Paul Brenndörfer) and the Wordfence team
-* Fix: A field could show up more than once in the form editor Existing Fields tab after it was moved
-* Fix: Textarea and Biographical Info fields showed &amp; instead of &
-* Misc: With Placeholder Labels on, the Edit Profile current password input showed "Password*" instead of "Current Password". Password and Repeat Password no longer show a required asterisk there
-* Misc: PHP 8.4 notice from the GDPR Communication Preferences field when it has no default options
+= 4.0.5 =
+* Fix: Security issue where a subsite administrator could edit a Super Admin, or an account that also belongs to another site, through the front-end Edit Profile form. Thanks to Szymon Szymkowiak and the WPScan team
+* Fix: Security issue regarding the redirect URL on Registration, Edit Profile, and password reset forms. Thanks to Jacek Sowiński and the WPScan team
+* Fix: Security issue regarding reCaptcha and Turnstile on the default WordPress comments form when comments are created through XML-RPC or the REST API. Thanks to Naoki Kawahigashi and the WPScan team
+* Fix: Security issue where a role set on a registration form inside post content could grant capabilities the post author does not have. Thanks to Jamir0qai and the Patchstack team
+* Fix: A role set on a registration form inside post content can no longer grant capabilities the post author does not have
+* Fix: Fatal error when opening the block editor on a page that contains the Register block
+* Fix: The Send Credentials checkbox stayed visible when Hidden and checked "Send Credentials" checkbox was enabled and a custom Send Credentials Text was set
+* Fix: Simple Upload inside a Repeater field left the submit button stuck on "Uploading file..." after a repeater group was added
 
 [Click Here](https://www.cozmoslabs.com/docs/profile-builder/free-changelog/?utm_source=wp.org&utm_medium=pb-description-page&utm_campaign=PBFree) to view the full changelog.

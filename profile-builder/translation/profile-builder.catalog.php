@@ -1118,7 +1118,6 @@
 <?php __("Before you can access your account, an administrator needs to approve it. You will be notified via email.", "profile-builder"); ?>
 <?php __("This username is already activated!", "profile-builder"); ?>
 <?php __("Could not create user!", "profile-builder"); ?>
-<?php __("Only an administrator can create pages with the register shortcode.", "profile-builder"); ?>
 <?php __("Only an administrator can create pages with a registration form.", "profile-builder"); ?>
 <?php __("After Login", "profile-builder"); ?>
 <?php __("After Logout", "profile-builder"); ?>

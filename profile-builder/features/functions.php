@@ -1611,6 +1611,71 @@ function wppb_verify_autologin_nonce( $nonce, $user_id ) {
 }
 
 /**
+ * Whether a comment created through XML-RPC or the REST API, the two ways besides the comment form that
+ * WordPress core creates comments, must pass the comment form captcha.
+ *
+ * Pingbacks and other comment types are not captcha protected, and users who can moderate comments are
+ * exempt so they can still reply from the mobile app, as they are from core's comment flood check.
+ *
+ * @param array $commentdata Comment data passed to the pre_comment_approved filter.
+ *
+ * @return bool
+ */
+function wppb_should_verify_api_comment( $commentdata ) {
+	if ( ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) && ! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return false;
+	}
+
+	if ( ! empty( $commentdata['comment_type'] ) && $commentdata['comment_type'] !== 'comment' ) {
+		return false;
+	}
+
+	return ! current_user_can( 'moderate_comments' );
+}
+
+/**
+ * Whether the current user may edit another user's account through the front-end Edit Profile form.
+ *
+ * On Multisite an account is shared by every site it belongs to, so site administrators can only edit
+ * accounts that belong to the current site alone, and never a Super Admin.
+ *
+ * @param int $user_id ID of the user to edit.
+ *
+ * @return bool
+ */
+function wppb_current_user_can_edit_other_user( $user_id ) {
+	$user_id = absint( $user_id );
+
+	if ( ! $user_id ) {
+		return false;
+	}
+
+	if ( $user_id === get_current_user_id() ) {
+		return true;
+	}
+
+	if ( ! is_multisite() ) {
+		return current_user_can( 'edit_users' );
+	}
+
+	if ( is_super_admin() ) {
+		return true;
+	}
+
+	if ( ! current_user_can( 'remove_users' ) && ! current_user_can( 'manage_options' ) ) {
+		return false;
+	}
+
+	if ( is_super_admin( $user_id ) ) {
+		return false;
+	}
+
+	$blogs = get_blogs_of_user( $user_id, true );
+
+	return count( $blogs ) === 1 && isset( $blogs[ get_current_blog_id() ] );
+}
+
+/**
  * Function that builds the redirect
  *
  * @param	string		$redirect_url	- redirect URL
@@ -1631,10 +1696,10 @@ function wppb_build_redirect( $redirect_url, $redirect_delay, $redirect_type = N
 		$redirect_url = ( wppb_check_missing_http( $redirect_url ) ? wppb_add_missing_http( $redirect_url ) : $redirect_url );
 
 		if( $redirect_delay == 0 ) {
-			$redirect_message = '<meta http-equiv="Refresh" content="'. $redirect_delay .';url='. $redirect_url .'" />';
+			$redirect_message = '<meta http-equiv="Refresh" content="'. $redirect_delay .';url='. esc_url( $redirect_url ) .'" />';
 		} else {
 			$redirect_url_href = apply_filters( 'wppb_redirect_url', '<a href="'. esc_url( $redirect_url ) .'">'. __( 'here', 'profile-builder' ) .'</a>', $redirect_url, $redirect_type, $form_args );
-			$redirect_message = apply_filters( 'wppb_redirect_message_before_returning', '<p class="redirect_message">'. sprintf( wp_slash( __( 'You will soon be redirected automatically. If you see this page for more than %1$d seconds, please click %2$s.%3$s', 'profile-builder' ) ), $redirect_delay, $redirect_url_href, '<meta http-equiv="Refresh" content="'. $redirect_delay .';url='. $redirect_url .'" />' ) .'</p>', $redirect_url, $redirect_delay, $redirect_url_href, $redirect_type, $form_args );
+			$redirect_message = apply_filters( 'wppb_redirect_message_before_returning', '<p class="redirect_message">'. sprintf( wp_slash( __( 'You will soon be redirected automatically. If you see this page for more than %1$d seconds, please click %2$s.%3$s', 'profile-builder' ) ), $redirect_delay, $redirect_url_href, '<meta http-equiv="Refresh" content="'. $redirect_delay .';url='. esc_url( $redirect_url ) .'" />' ) .'</p>', $redirect_url, $redirect_delay, $redirect_url_href, $redirect_type, $form_args );
 		}
 	}
 

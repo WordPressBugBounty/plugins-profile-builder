@@ -679,7 +679,9 @@ add_action( 'comment_form_top', 'wppb_display_turnstile_default_wp_comments_erro
 
 // Verify Turnstile for default WP Comments form
 function wppb_verify_turnstile_default_wp_comments( $approved, $commentdata ){
-    if ( !isset( $_POST['comment_post_ID'] ) )
+    $is_comment_form = isset( $_POST['comment_post_ID'] );
+
+    if ( !$is_comment_form && !wppb_should_verify_api_comment( $commentdata ) )
         return $approved;
 
     $field = wppb_get_turnstile_field();
@@ -687,10 +689,13 @@ function wppb_verify_turnstile_default_wp_comments( $approved, $commentdata ){
     if ( !empty( $field ) ) {
         if ( isset( $field['turnstile-wp-forms'] ) && ( strpos( $field['turnstile-wp-forms'], 'default_wp_comments' ) !== false ) ) {
             global $wppb_turnstile_response;
-            if ( !isset( $wppb_turnstile_response ) )
+            if ( !isset( $wppb_turnstile_response ) || !$is_comment_form )
                 $wppb_turnstile_response = wppb_validate_turnstile_response( trim( $field['turnstile-site-key'] ), trim( $field['turnstile-secret-key'] ) );
 
             if ( $wppb_turnstile_response == false ) {
+                if ( !$is_comment_form )
+                    return new WP_Error( 'wppb_turnstile_error', wppb_get_turnstile_default_wp_comments_error_message(), array( 'status' => 403 ) );
+
                 $redirect_to = wp_get_referer();
 
                 if ( empty( $redirect_to ) && isset( $commentdata['comment_post_ID'] ) )

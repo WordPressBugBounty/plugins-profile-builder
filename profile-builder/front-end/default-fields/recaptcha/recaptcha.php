@@ -1013,7 +1013,9 @@ add_action( 'comment_form_top', 'wppb_display_recaptcha_default_wp_comments_erro
 
 // Verify reCAPTCHA for default WP Comments form
 function wppb_verify_recaptcha_default_wp_comments( $approved, $commentdata ){
-    if ( !isset( $_POST['comment_post_ID'] ) )
+    $is_comment_form = isset( $_POST['comment_post_ID'] );
+
+    if ( !$is_comment_form && !wppb_should_verify_api_comment( $commentdata ) )
         return $approved;
 
     $field = wppb_get_recaptcha_field();
@@ -1021,10 +1023,13 @@ function wppb_verify_recaptcha_default_wp_comments( $approved, $commentdata ){
     if ( !empty( $field ) ) {
         if ( isset( $field['captcha-wp-forms'] ) && ( strpos( $field['captcha-wp-forms'], 'default_wp_comments' ) !== false ) ) {
             global $wppb_recaptcha_response;
-            if ( !isset( $wppb_recaptcha_response ) )
+            if ( !isset( $wppb_recaptcha_response ) || !$is_comment_form )
                 $wppb_recaptcha_response = wppb_validate_captcha_response( trim( $field['public-key'] ), trim( $field['private-key'] ), isset( $field['score-threshold'] ) ? trim( $field['score-threshold'] ) : 0.5 );
 
             if ( $wppb_recaptcha_response == false ) {
+                if ( !$is_comment_form )
+                    return new WP_Error( 'wppb_recaptcha_error', wppb_recaptcha_field_error( $field['field-title'] ), array( 'status' => 403 ) );
+
                 $redirect_to = wp_get_referer();
 
                 if ( empty( $redirect_to ) && isset( $commentdata['comment_post_ID'] ) )

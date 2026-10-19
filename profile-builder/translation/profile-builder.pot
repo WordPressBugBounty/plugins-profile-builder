@@ -6,7 +6,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-12 10:35+0000\n"
+"POT-Creation-Date: 2026-10-19 11:58+0000\n"
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-KeywordsList: __;_e;_ex:1,2c;_n:1,2;_n_noop:1,2;_nx:1,2,4c;_nx_noop:1,2,3c;_x:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
 "X-Poedit-SearchPath-0: .\n"
@@ -436,7 +436,7 @@ msgstr ""
 msgid "Introducing the new Profile Builder Form Builder."
 msgstr ""
 
-#: admin/admin-functions.php:737, admin/register-version.php:316, admin/register-version.php:301, admin/register-version.php:283, admin/review.php:111, features/functions.php:159, add-ons-advanced/file-restriction/index.php:156, add-ons-advanced/social-connect/index.php:1139, front-end/default-fields/recaptcha/recaptcha.php:1071, front-end/extra-fields/international-telephone-input/international-telephone-input.php:60
+#: admin/admin-functions.php:737, admin/register-version.php:316, admin/register-version.php:301, admin/register-version.php:283, admin/review.php:111, features/functions.php:159, add-ons-advanced/file-restriction/index.php:156, add-ons-advanced/social-connect/index.php:1139, front-end/default-fields/recaptcha/recaptcha.php:1076, front-end/extra-fields/international-telephone-input/international-telephone-input.php:60
 msgid "Dismiss this notice."
 msgstr ""
 
@@ -444,7 +444,7 @@ msgstr ""
 msgid "Before You Go"
 msgstr ""
 
-#: admin/admin-functions.php:884, admin/admin-functions.php:1055, features/functions.php:1923
+#: admin/admin-functions.php:884, admin/admin-functions.php:1055, features/functions.php:1988
 msgid "Profile Builder"
 msgstr ""
 
@@ -1164,7 +1164,7 @@ msgstr ""
 msgid "Select the page which contains the \"[wppb-recover-password]\" shortcode."
 msgstr ""
 
-#: admin/general-settings.php:364, admin/general-settings.php:376, features/two-factor-authentication/class-two-factor-authentication.php:137, features/two-factor-authentication/class-two-factor-authentication.php:219
+#: admin/general-settings.php:364, admin/general-settings.php:376, features/two-factor-authentication/class-two-factor-authentication.php:137, features/two-factor-authentication/class-two-factor-authentication.php:217
 msgid "Two-Factor Authentication"
 msgstr ""
 
@@ -1428,7 +1428,7 @@ msgstr ""
 msgid "A unique, auto-generated ID for this particular field<br/>You can use this in conjuction with filters to target this element if needed<br/>Can't be edited"
 msgstr ""
 
-#: admin/manage-fields.php:268, features/two-factor-authentication/class-two-factor-authentication.php:232, features/two-factor-authentication/class-two-factor-authentication.php:428
+#: admin/manage-fields.php:268, features/two-factor-authentication/class-two-factor-authentication.php:230, features/two-factor-authentication/class-two-factor-authentication.php:426
 msgid "Description"
 msgstr ""
 
@@ -3718,7 +3718,7 @@ msgstr ""
 msgid "Payment Management"
 msgstr ""
 
-#: admin/pms-cross-promotion.php:120, admin/pms-cross-promotion.php:158, admin/pms-cross-promotion.php:243, add-ons/user-listing/userlisting.php:3480, features/two-factor-authentication/class-two-factor-authentication.php:223, features/two-factor-authentication/class-two-factor-authentication.php:415
+#: admin/pms-cross-promotion.php:120, admin/pms-cross-promotion.php:158, admin/pms-cross-promotion.php:243, add-ons/user-listing/userlisting.php:3480, features/two-factor-authentication/class-two-factor-authentication.php:221, features/two-factor-authentication/class-two-factor-authentication.php:413
 msgid "Activate"
 msgstr ""
 
@@ -4164,23 +4164,23 @@ msgstr ""
 msgid "<br><br>You can visit your site at "
 msgstr ""
 
-#: features/functions.php:1636, add-ons-advanced/social-connect/index.php:451
+#: features/functions.php:1701, add-ons-advanced/social-connect/index.php:451
 msgid "here"
 msgstr ""
 
-#: features/functions.php:1637
+#: features/functions.php:1702
 msgid "You will soon be redirected automatically. If you see this page for more than %1$d seconds, please click %2$s.%3$s"
 msgstr ""
 
-#: features/functions.php:1836
+#: features/functions.php:1901
 msgid "No feed available,please visit our <a href=\"%s\">homepage</a>!"
 msgstr ""
 
-#: features/functions.php:1886
+#: features/functions.php:1951
 msgid "You are not currently logged in."
 msgstr ""
 
-#: features/functions.php:1941, features/email-confirmation/class-email-confirmation.php:197, features/email-confirmation/email-confirmation.php:163
+#: features/functions.php:2006, features/email-confirmation/class-email-confirmation.php:197, features/email-confirmation/email-confirmation.php:163
 msgid "User Meta"
 msgstr ""
 
@@ -4501,7 +4501,7 @@ msgstr ""
 msgid "Check your email for the confirmation link."
 msgstr ""
 
-#: front-end/recover.php:400, front-end/recover.php:565, features/two-factor-authentication/class-two-factor-authentication.php:811
+#: front-end/recover.php:400, front-end/recover.php:565, features/two-factor-authentication/class-two-factor-authentication.php:809
 msgid "ERROR:"
 msgstr ""
 
@@ -4541,11 +4541,7 @@ msgstr ""
 msgid "Could not create user!"
 msgstr ""
 
-#: front-end/register.php:224
-msgid "Only an administrator can create pages with the register shortcode."
-msgstr ""
-
-#: front-end/register.php:243
+#: front-end/register.php:248
 msgid "Only an administrator can create pages with a registration form."
 msgstr ""
 
@@ -5813,79 +5809,79 @@ msgstr ""
 msgid "[{{site_name}}] A user has updated their profile. Some fields need approval"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:288
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:291
 msgid "Requires Admin Approval on Edit Profile"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:288
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:291
 msgid "Choose if this field requires an administrator to approve any modifications on the edit profile forms"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:416
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:419
 msgid "This field requires admin approval on edit profile"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:485
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:488
 msgid "Finish Review and Send Notifications"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:486
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:489
 msgid "Approve All"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:504
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:507
 msgid "This field requires approval by an administrator"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:533, features/admin-approval/class-admin-approval.php:374
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:536, features/admin-approval/class-admin-approval.php:374
 msgid "Unapproved"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:533, features/admin-approval/class-admin-approval.php:372
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:536, features/admin-approval/class-admin-approval.php:372
 msgid "Approved"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:886, add-ons-advanced/edit-profile-approved-by-admin/index.php:916
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:889, add-ons-advanced/edit-profile-approved-by-admin/index.php:919
 msgid "Your profile has been reviewed by an administrator"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:908
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:911
 msgid "Approved fields:%s"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:912
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:915
 msgid "Unapproved fields:%s"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:935
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:938
 msgid "Field %1$s changed from %2$s to %3$s"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:943
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:946
 msgid "The user %1$s has updated their profile and some of the fields require admin approval:<br><br> %2$s"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:945
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:948
 msgid "Access this link to approve changes: %1$s"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:948
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:951
 msgid "A user has updated their profile. Some fields need approval"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:968
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:971
 msgid "Field %1$s requires approval from an administrator"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1043
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1046
 msgid "Show users that require review"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1045
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1048
 msgid "Show reviewed users with unapproved fields"
 msgstr ""
 
-#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1048
+#: add-ons-advanced/edit-profile-approved-by-admin/index.php:1051
 msgid "Exit Review Mode"
 msgstr ""
 
@@ -8191,11 +8187,11 @@ msgstr ""
 msgid "Invalid"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:99, features/two-factor-authentication/class-two-factor-authentication.php:284, features/two-factor-authentication/class-two-factor-authentication.php:466
+#: features/two-factor-authentication/class-two-factor-authentication.php:99, features/two-factor-authentication/class-two-factor-authentication.php:282, features/two-factor-authentication/class-two-factor-authentication.php:464
 msgid "Backup Codes"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:100, features/two-factor-authentication/class-two-factor-authentication.php:287, features/two-factor-authentication/class-two-factor-authentication.php:469
+#: features/two-factor-authentication/class-two-factor-authentication.php:100, features/two-factor-authentication/class-two-factor-authentication.php:285, features/two-factor-authentication/class-two-factor-authentication.php:467
 msgid "Regenerate Backup Codes"
 msgstr ""
 
@@ -8219,147 +8215,147 @@ msgstr ""
 msgid "remaining codes"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:209, features/two-factor-authentication/class-two-factor-authentication.php:404
+#: features/two-factor-authentication/class-two-factor-authentication.php:207, features/two-factor-authentication/class-two-factor-authentication.php:402
 msgid "Two-Factor Authentication is required for your role. Please set it up now."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:205, features/two-factor-authentication/class-two-factor-authentication.php:400
+#: features/two-factor-authentication/class-two-factor-authentication.php:203, features/two-factor-authentication/class-two-factor-authentication.php:398
 msgid "You must set up Two-Factor Authentication within %d days. Your role requires 2FA for security."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:228, features/two-factor-authentication/class-two-factor-authentication.php:421
+#: features/two-factor-authentication/class-two-factor-authentication.php:226, features/two-factor-authentication/class-two-factor-authentication.php:419
 msgid "Relaxed Mode"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:229, features/two-factor-authentication/class-two-factor-authentication.php:424
+#: features/two-factor-authentication/class-two-factor-authentication.php:227, features/two-factor-authentication/class-two-factor-authentication.php:422
 msgid "Allow for more time drift on your phone clock ( &#177;4 min )."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:234
+#: features/two-factor-authentication/class-two-factor-authentication.php:232
 msgid "Description that you'll see in the Authenticator app."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:237, features/two-factor-authentication/class-two-factor-authentication.php:435
+#: features/two-factor-authentication/class-two-factor-authentication.php:235, features/two-factor-authentication/class-two-factor-authentication.php:433
 msgid "Secret"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:241
+#: features/two-factor-authentication/class-two-factor-authentication.php:239
 msgid "New Secret"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:242
+#: features/two-factor-authentication/class-two-factor-authentication.php:240
 msgid "QR Code"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:245, features/two-factor-authentication/class-two-factor-authentication.php:445
+#: features/two-factor-authentication/class-two-factor-authentication.php:243, features/two-factor-authentication/class-two-factor-authentication.php:443
 msgid "Scan this with the Authenticator app:"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:249, features/two-factor-authentication/class-two-factor-authentication.php:451
+#: features/two-factor-authentication/class-two-factor-authentication.php:247, features/two-factor-authentication/class-two-factor-authentication.php:449
 msgid "Verify TOTP"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:253, features/two-factor-authentication/class-two-factor-authentication.php:454
+#: features/two-factor-authentication/class-two-factor-authentication.php:251, features/two-factor-authentication/class-two-factor-authentication.php:452
 msgid "Check"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:297, features/two-factor-authentication/class-two-factor-authentication.php:476
+#: features/two-factor-authentication/class-two-factor-authentication.php:295, features/two-factor-authentication/class-two-factor-authentication.php:474
 msgid "%d remaining codes"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:294, features/two-factor-authentication/class-two-factor-authentication.php:474
+#: features/two-factor-authentication/class-two-factor-authentication.php:292, features/two-factor-authentication/class-two-factor-authentication.php:472
 msgid "No remaining codes!"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:291, features/two-factor-authentication/class-two-factor-authentication.php:472
+#: features/two-factor-authentication/class-two-factor-authentication.php:289, features/two-factor-authentication/class-two-factor-authentication.php:470
 msgid "%d remaining codes!"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:391
+#: features/two-factor-authentication/class-two-factor-authentication.php:389
 msgid "Two-Factor Authentication Settings"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:431
+#: features/two-factor-authentication/class-two-factor-authentication.php:429
 msgid "Description that you'll see in the Authenticator app on your phone."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:438
+#: features/two-factor-authentication/class-two-factor-authentication.php:436
 msgid "Create new secret"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:439
+#: features/two-factor-authentication/class-two-factor-authentication.php:437
 msgid "Show/Hide QR code"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:502, features/two-factor-authentication/class-two-factor-authentication.php:648
+#: features/two-factor-authentication/class-two-factor-authentication.php:500, features/two-factor-authentication/class-two-factor-authentication.php:646
 msgid "Two-Factor Authentication is required for your role. Please enable it."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:510, features/two-factor-authentication/class-two-factor-authentication.php:641
+#: features/two-factor-authentication/class-two-factor-authentication.php:508, features/two-factor-authentication/class-two-factor-authentication.php:639
 msgid "You cannot disable Two-Factor Authentication as it is required for your role."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:539
+#: features/two-factor-authentication/class-two-factor-authentication.php:537
 msgid "Two-Factor Authentication has been successfully set up!"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:540
+#: features/two-factor-authentication/class-two-factor-authentication.php:538
 msgid "Continue to your destination"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:625
+#: features/two-factor-authentication/class-two-factor-authentication.php:623
 msgid "Please verify TOTP to edit your profile."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:668
+#: features/two-factor-authentication/class-two-factor-authentication.php:666
 msgid "Please verify TOTP to change Two-Factor Authentication settings"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:666
+#: features/two-factor-authentication/class-two-factor-authentication.php:664
 msgid "Please verify TOTP to set up Two-Factor Authentication"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:807, features/two-factor-authentication/class-two-factor-authentication.php:1019, features/two-factor-authentication/class-two-factor-authentication.php:1023
+#: features/two-factor-authentication/class-two-factor-authentication.php:805, features/two-factor-authentication/class-two-factor-authentication.php:1017, features/two-factor-authentication/class-two-factor-authentication.php:1021
 msgid "Please enter the code from your Authenticator app."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:811
+#: features/two-factor-authentication/class-two-factor-authentication.php:809
 msgid "Your Authenticator code was incorrect. Please try again."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:885
+#: features/two-factor-authentication/class-two-factor-authentication.php:883
 msgid "Application passwords are disabled because Two-Factor Authentication is required for your account."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1059
+#: features/two-factor-authentication/class-two-factor-authentication.php:1057
 msgid "Authentication Code"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1061
+#: features/two-factor-authentication/class-two-factor-authentication.php:1059
 msgid "Enter your 6-digit authenticator code or 16-digit backup code."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1556
+#: features/two-factor-authentication/class-two-factor-authentication.php:1554
 msgid "Your role requires Two-Factor Authentication. Please set it up immediately."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1552
+#: features/two-factor-authentication/class-two-factor-authentication.php:1550
 msgid "Your role requires Two-Factor Authentication. You have %d days remaining to set it up."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1562
+#: features/two-factor-authentication/class-two-factor-authentication.php:1560
 msgid "Set up 2FA Now"
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1902
+#: features/two-factor-authentication/class-two-factor-authentication.php:1900
 msgid "User not logged in."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1907
+#: features/two-factor-authentication/class-two-factor-authentication.php:1905
 msgid "Please wait before regenerating backup codes again."
 msgstr ""
 
-#: features/two-factor-authentication/class-two-factor-authentication.php:1916
+#: features/two-factor-authentication/class-two-factor-authentication.php:1914
 msgid "Backup codes generated"
 msgstr ""
 
@@ -9431,7 +9427,7 @@ msgstr ""
 msgid "Click the BACK button on your browser, and try again."
 msgstr ""
 
-#: front-end/default-fields/recaptcha/recaptcha.php:1070
+#: front-end/default-fields/recaptcha/recaptcha.php:1075
 msgid "reCAPTCHA v3 is not compatible with Paid Member Subscriptions versions that are older than <strong>2.12.7</strong>. <br>Please update Paid Member Subscriptions to a newer version to avoid any issues."
 msgstr ""
 
