@@ -227,6 +227,13 @@ jQuery( function() {
                 jQuery('#wppb-toolbox-redirect-if-empty-required-url').hide();
         });
 
+        jQuery('#toolbox-captcha-after-failed-logins').on('click', function () {
+            if (jQuery(this).prop('checked'))
+                jQuery('#wppb-toolbox-captcha-after-failed-logins-attempts').css('display','flex');
+            else
+                jQuery('#wppb-toolbox-captcha-after-failed-logins-attempts').hide();
+        });
+
         jQuery('#wppb-color-switcher').on('click', function () {
             if (jQuery(this).prop('checked'))
                 jQuery('.wppb-color-switcher-section').css('display','flex');
@@ -243,6 +250,9 @@ jQuery( function() {
 
         if (jQuery('#toolbox-redirect-if-empty-required').prop('checked'))
             jQuery('#wppb-toolbox-redirect-if-empty-required-url').css('display','flex');
+
+        if (jQuery('#toolbox-captcha-after-failed-logins').prop('checked'))
+            jQuery('#wppb-toolbox-captcha-after-failed-logins-attempts').css('display','flex');
 
         if (jQuery('#wppb-color-switcher').prop('checked'))
             jQuery('.wppb-color-switcher-section').css('display','flex');

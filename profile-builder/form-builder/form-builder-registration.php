@@ -214,7 +214,7 @@ function wppb_fb_disable_remote_patterns( $should_load ) {
 /** Disables all block patterns in the editor settings for the form CPTs. */
 add_filter( 'block_editor_settings_all', 'wppb_fb_disable_patterns_in_settings', 10, 2 );
 function wppb_fb_disable_patterns_in_settings( $settings, $context ) {
-    if ( ! wppb_fb_is_form_cpt( $context->post->post_type ) ) {
+    if ( empty( $context->post ) || ! wppb_fb_is_form_cpt( $context->post->post_type ) ) {
         return $settings;
     }
 

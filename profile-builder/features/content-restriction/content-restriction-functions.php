@@ -10,9 +10,12 @@ function wppb_content_restriction_is_post_restricted( $post_id = null ) {
 
     global $post, $wppb_show_content, $wppb_is_post_restricted_arr;
 
+    // null is deprecated as an array offset in PHP 8.5
+    $cache_key = is_null( $post_id ) ? '' : $post_id;
+
     // If we have a cached result, return it
-    if( isset( $wppb_is_post_restricted_arr[$post_id] ) ) {
-        return $wppb_is_post_restricted_arr[$post_id];
+    if( isset( $wppb_is_post_restricted_arr[$cache_key] ) ) {
+        return $wppb_is_post_restricted_arr[$cache_key];
     }
 
     $post_obj = $post;
@@ -26,12 +29,12 @@ function wppb_content_restriction_is_post_restricted( $post_id = null ) {
 
     // Cache the result for further usage
     if( $wppb_show_content === false ) {
-        $wppb_is_post_restricted_arr[$post_id] = true;
+        $wppb_is_post_restricted_arr[$cache_key] = true;
     } else {
-        $wppb_is_post_restricted_arr[$post_id] = false;
+        $wppb_is_post_restricted_arr[$cache_key] = false;
     }
 
-    return $wppb_is_post_restricted_arr[$post_id];
+    return $wppb_is_post_restricted_arr[$cache_key];
 
 }
 
@@ -68,6 +71,27 @@ function wppb_content_restriction_check_user_access( $user_status, $user_roles =
     }
 
     return true;
+}
+
+/**
+ * Whether an Elementor fallback template may be rendered to the current viewer.
+ *
+ * The template id comes from editor-controlled Elementor settings, so a draft or
+ * private post is only rendered when it is published or the current user can read it.
+ * This keeps a restricted visitor from being shown another user's unpublished page.
+ */
+function wppb_content_restriction_user_can_view_template( $id ) {
+    $id = absint( $id );
+
+    if ( empty( $id ) ) {
+        return false;
+    }
+
+    if ( 'publish' === get_post_status( $id ) ) {
+        return true;
+    }
+
+    return current_user_can( 'read_post', $id );
 }
 
 function wppb_content_restriction_get_restricted_term_for_post( $post_id ) {
@@ -312,10 +336,10 @@ function wppb_content_restriction_post_redirect() {
     // Pass the correct referer URL forward
         $redirect_url = add_query_arg( $query_args, wppb_add_missing_http( $redirect_url ) );
     // Redirect
-    nocache_headers();
-    wp_redirect( apply_filters( 'wppb_restricted_post_redirect_url', $redirect_url ) );
-    exit;
-    
+    if ( wppb_content_restriction_safe_redirect( apply_filters( 'wppb_restricted_post_redirect_url', $redirect_url ), $redirect_url ) ) {
+        exit;
+    }
+
 }
 add_action( 'template_redirect', 'wppb_content_restriction_post_redirect' );
 
@@ -385,11 +409,48 @@ function wppb_content_restriction_taxonomy_redirect() {
     $redirect_url = add_query_arg( $query_args, wppb_add_missing_http( $redirect_url ) );
 
     // Redirect
-    nocache_headers();
-    wp_redirect( apply_filters( 'wppb_restricted_term_redirect_url', $redirect_url, $restricted_term ) );
-    exit;
+    if ( wppb_content_restriction_safe_redirect( apply_filters( 'wppb_restricted_term_redirect_url', $redirect_url, $restricted_term ), $redirect_url ) ) {
+        exit;
+    }
 }
 add_action( 'template_redirect', 'wppb_content_restriction_taxonomy_redirect' );
+
+/* Same as wp_safe_redirect(), but falls back to the home page, also allows the host of $admin_redirect_url (the URL set in the admin before any filter ran), and does not redirect the front page to itself */
+function wppb_content_restriction_safe_redirect( $location, $admin_redirect_url ) {
+    $location            = wp_sanitize_redirect( $location );
+    $admin_redirect_host = wp_parse_url( wp_sanitize_redirect( $admin_redirect_url ), PHP_URL_HOST );
+
+    $allow_admin_redirect_host = function( $hosts ) use ( $admin_redirect_host ) {
+        if ( ! empty( $admin_redirect_host ) ) {
+            $hosts[] = $admin_redirect_host;
+        }
+
+        return $hosts;
+    };
+
+    add_filter( 'allowed_redirect_hosts', $allow_admin_redirect_host );
+    $location = wp_validate_redirect( $location, home_url() );
+    remove_filter( 'allowed_redirect_hosts', $allow_admin_redirect_host );
+
+    if ( is_front_page() && untrailingslashit( $location ) === untrailingslashit( home_url() ) ) {
+        return false;
+    }
+
+    nocache_headers();
+    wp_redirect( $location );
+
+    return true;
+}
+
+function wppb_content_restriction_can_store_offsite_redirect( $user_id ) {
+    return user_can( $user_id, 'unfiltered_html' ) || user_can( $user_id, 'manage_options' );
+}
+
+/* The Custom Fields box and XML-RPC write the post meta directly, without the meta box check */
+function wppb_content_restriction_auth_redirect_url_meta( $allowed, $meta_key, $post_id, $user_id ) {
+    return $allowed && wppb_content_restriction_can_store_offsite_redirect( $user_id );
+}
+add_filter( 'auth_post_meta_wppb-content-restrict-custom-redirect-url', 'wppb_content_restriction_auth_redirect_url_meta', 10, 4 );
 
 /* Function that searches and replaces merge tags with their values */
 function wppb_content_restriction_merge_tags( $text, $user_info, $post_id = 0 ) {
@@ -398,7 +459,8 @@ function wppb_content_restriction_merge_tags( $text, $user_info, $post_id = 0 ) 
 
     if( ! empty( $merge_tags ) ) {
         foreach( $merge_tags as $merge_tag ) {
-            $text = str_replace( '{{'. $merge_tag .'}}', apply_filters( 'wppb_content_restriction_merge_tag_'. $merge_tag, '', $user_info, $post_id ), $text );
+            $merge_tag_value = apply_filters( 'wppb_content_restriction_merge_tag_'. $merge_tag, '', $user_info, $post_id );
+            $text = str_replace( '{{'. $merge_tag .'}}', esc_html( $merge_tag_value ), $text );
         }
     }
 
@@ -413,7 +475,8 @@ function wppb_content_restriction_merge_term_tags( $text, $user_info, $term_id =
 
     if( ! empty( $merge_tags ) ) {
         foreach( $merge_tags as $merge_tag ) {
-            $text = str_replace( '{{'. $merge_tag .'}}', apply_filters( 'wppb_term_content_restriction_merge_tag_'. $merge_tag, '', $user_info, $term_id ), $text );
+            $merge_tag_value = apply_filters( 'wppb_term_content_restriction_merge_tag_'. $merge_tag, '', $user_info, $term_id );
+            $text = str_replace( '{{'. $merge_tag .'}}', esc_html( $merge_tag_value ), $text );
         }
     }
 
@@ -443,9 +506,9 @@ function wppb_content_restriction_tag_unrestricted_user_roles( $value, $user_inf
         $unrestricted_user_roles = get_post_meta( $post_id, 'wppb-content-restrict-user-role' );
 
         if( ! empty( $unrestricted_user_roles ) ) {
-            $user_roles = implode( ', ', $unrestricted_user_roles );
+            $unrestricted_user_roles = array_filter( $unrestricted_user_roles, 'wppb_content_restriction_is_valid_role' );
 
-            return $user_roles;
+            return implode( ', ', $unrestricted_user_roles );
         } else {
             return '';
         }
@@ -463,9 +526,9 @@ function wppb_content_restriction_term_tag_unrestricted_user_roles( $value, $use
         $unrestricted_user_roles = get_term_meta( $term_id, 'wppb-content-restrict-user-role' );
 
         if( ! empty( $unrestricted_user_roles ) ) {
-            $user_roles = implode( ', ', $unrestricted_user_roles );
+            $unrestricted_user_roles = array_filter( $unrestricted_user_roles, 'wppb_content_restriction_is_valid_role' );
 
-            return $user_roles;
+            return implode( ', ', $unrestricted_user_roles );
         } else {
             return '';
         }
@@ -475,6 +538,10 @@ function wppb_content_restriction_term_tag_unrestricted_user_roles( $value, $use
 
 }
 add_filter( 'wppb_term_content_restriction_merge_tag_unrestricted_user_roles', 'wppb_content_restriction_term_tag_unrestricted_user_roles', 10, 3 );
+
+function wppb_content_restriction_is_valid_role( $role ) {
+    return is_string( $role ) && wp_roles()->is_role( $role );
+}
 
 /* Add functionality for current_user_role tag */
 function wppb_content_restriction_tag_current_user_role( $value, $user_info, $post_id = 0 ) {

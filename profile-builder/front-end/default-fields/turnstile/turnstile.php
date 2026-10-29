@@ -119,8 +119,8 @@ function wppb_turnstile_script_footer(){
                     let widgetId = turnstile.render( 
                         "#" + $turnstileElement.attr("id"), 
                         {
-                            "sitekey" : "' . $pubkey . '",
-                            "theme": "' . $theme . '"
+                            "sitekey" : "' . esc_js( $pubkey ) . '",
+                            "theme": "' . esc_js( $theme ) . '"
                         }
                     )
                     
@@ -360,16 +360,14 @@ function wppb_turnstile_change_recover_password_message_no($messageNo) {
 
         if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'recover_password') {
             $field = wppb_get_turnstile_field();
-            if (!empty($field)) {
+            // only verify when Turnstile is enabled on this form, the token is single use (see wppb_turnstile_login_wp_error_message)
+            if ( !empty($field) && isset($field['turnstile-pb-forms']) && (strpos($field['turnstile-pb-forms'], 'pb_recover_password') !== false) ) {
 
                 global $wppb_turnstile_response;
                 if (!isset($wppb_turnstile_response)) $wppb_turnstile_response = wppb_validate_turnstile_response( trim( $field['turnstile-site-key'] ), trim( $field['turnstile-secret-key'] ) );
 
-                if ( isset($field['turnstile-pb-forms']) && (strpos($field['turnstile-pb-forms'], 'pb_recover_password') !== false) ) {
-
-                    if ( $wppb_turnstile_response == false )
-                        $messageNo = '';
-                }
+                if ( $wppb_turnstile_response == false )
+                    $messageNo = '';
             }
         }
 
@@ -381,11 +379,12 @@ add_filter('wppb_recover_password_message_no', 'wppb_turnstile_change_recover_pa
 function wppb_turnstile_recover_password_displayed_message1( $message ) {
     $field = wppb_get_turnstile_field();
 
-    if ( !empty($field) ){
+    // only verify when Turnstile is enabled on this form, the token is single use (see wppb_turnstile_login_wp_error_message)
+    if ( !empty($field) && isset($field['turnstile-pb-forms']) && ( strpos( $field['turnstile-pb-forms'],'pb_recover_password' ) !== false ) ){
         global $wppb_turnstile_response;
         if (!isset($wppb_turnstile_response)) $wppb_turnstile_response = wppb_validate_turnstile_response( trim( $field['turnstile-site-key'] ), trim( $field['turnstile-secret-key'] ) );
 
-        if ( isset($field['turnstile-pb-forms']) && ( strpos( $field['turnstile-pb-forms'],'pb_recover_password' ) !== false ) && ( $wppb_turnstile_response == false )) {
+        if ( $wppb_turnstile_response == false ) {
 
             $turnstile_error_message = __('Cloudflare Turnstile could not be verified. Please try again.', 'profile-builder');
 
@@ -408,11 +407,12 @@ function wppb_turnstile_recover_password_sent_message_1($message) {
         if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'recover_password') {
             $field = wppb_get_turnstile_field();
 
-            if (!empty($field)) {
+            // only verify when Turnstile is enabled on this form, the token is single use (see wppb_turnstile_login_wp_error_message)
+            if ( !empty($field) && isset($field['turnstile-pb-forms']) && ( strpos($field['turnstile-pb-forms'], 'pb_recover_password') !== false ) ) {
                 global $wppb_turnstile_response;
                 if (!isset($wppb_turnstile_response)) $wppb_turnstile_response = wppb_validate_turnstile_response( trim( $field['turnstile-site-key'] ), trim( $field['turnstile-secret-key'] ) );
 
-                if ( isset($field['turnstile-pb-forms']) && ( strpos($field['turnstile-pb-forms'], 'pb_recover_password') !== false ) && ( $wppb_turnstile_response == false ) ){
+                if ( $wppb_turnstile_response == false ){
                     $message = 'wppb_turnstile_error';
                 }
             }
@@ -435,7 +435,7 @@ function wppb_display_turnstile_login_form($form_part, $args) {
         $item_title = apply_filters('wppb_login_turnstile_custom_field_' . $field['id'] . '_item_title', wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_title_translation', $field['field-title'], true));
         $item_description = wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_description_translation', $field['description'], true);
 
-        if ( isset($field['turnstile-pb-forms']) && ( strpos( $field['turnstile-pb-forms'],'pb_login' ) !== false ) ) { // check where Turnstile should display
+        if ( wppb_login_captcha_required( 'Turnstile', 'pb_login' ) ) {
 
             global $wppb_turnstile_present;
             $wppb_turnstile_present = true;
@@ -461,7 +461,7 @@ function wppb_display_turnstile_wp_login_form(){
         $item_title = apply_filters('wppb_login_turnstile_custom_field_' . $field['id'] . '_item_title', wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_title_translation', $field['field-title'], true));
         $item_description = wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_description_translation', $field['description'], true);
 
-        if ( isset($field['turnstile-wp-forms']) && (strpos( $field['turnstile-wp-forms'],'default_wp_login' ) !== false) ) {
+        if ( wppb_login_captcha_required( 'Turnstile', 'default_wp_login' ) ) {
 
             global $wppb_turnstile_present;
             $wppb_turnstile_present = true;
@@ -479,8 +479,10 @@ add_action( 'login_form', 'wppb_display_turnstile_wp_login_form' );
 
 //Show Turnstile error on Login form (both default and PB one)
 function wppb_turnstile_login_wp_error_message($user){
+    $form = wppb_submitted_login_form();
+
     //make sure you\'re on a Login form (WP or PB)
-    if ( isset( $_POST['log'] ) && !is_wp_error($user) && !isset( $_POST['pms_login'] ) ) {
+    if ( isset( $_POST['log'] ) && !is_wp_error($user) && $form != 'pms_login' ) {
 
         $field = wppb_get_turnstile_field();
         if ( !empty($field) ){
@@ -488,16 +490,7 @@ function wppb_turnstile_login_wp_error_message($user){
             anything. The Cloudflare token is single use, so verifying it on a form where our widget was never
             displayed spends a token that belongs to whatever else protects that form, and that plugin\'s own
             check then fails with timeout-or-duplicate. */
-            if ( isset($_POST['wppb_login']) && ($_POST['wppb_login'] == true) ) {
-                // it\'s a PB login form, check if we have Turnstile on it
-                $turnstile_enabled = ( isset($field['turnstile-pb-forms']) && (strpos($field['turnstile-pb-forms'], 'pb_login') !== false) );
-            }
-            else {
-                // default WP login form
-                $turnstile_enabled = ( isset($field['turnstile-wp-forms']) && (strpos($field['turnstile-wp-forms'], 'default_wp_login') !== false) );
-            }
-
-            if ( $turnstile_enabled ) {
+            if ( wppb_login_captcha_required( 'Turnstile', $form ) ) {
                 global $wppb_turnstile_response;
 
                 if (!isset($wppb_turnstile_response)) $wppb_turnstile_response = wppb_validate_turnstile_response( trim( $field['turnstile-site-key'] ), trim( $field['turnstile-secret-key'] ) );

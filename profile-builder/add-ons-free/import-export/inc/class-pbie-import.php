@@ -7,6 +7,7 @@ class WPPB_ImpEx_Import {
 	protected $args_to_import;
 	public $import_messages = array();
 	private $j = '0';
+	private $templates_sanitized = false;
 
 	function __construct( $args_to_import ) {
 		$this->args_to_import = $args_to_import;
@@ -55,13 +56,14 @@ class WPPB_ImpEx_Import {
 								wp_delete_post( $db_post->ID, $force_delete = true );
 							}
 						}
-						unset( $imported_post["ID"] );
+						// wp_insert_post() writes meta_input itself, so it would skip sanitize_template_meta().
+						unset( $imported_post["ID"], $imported_post["meta_input"] );
 						$imported_post_id = wp_insert_post( $imported_post );
 						foreach( $imported_post["postmeta"] as $key => $value ) {
 							// Replace, don't append — get_post_meta(..., true) would otherwise return a stale first row.
 							delete_post_meta( $imported_post_id, $key );
 							foreach( $value as $raw_value ) {
-								add_post_meta( $imported_post_id, $key, $this->restore_meta_value( $raw_value ) );
+								add_post_meta( $imported_post_id, $key, $this->sanitize_template_meta( $key, $this->restore_meta_value( $raw_value ) ) );
 							}
 						}
 
@@ -79,6 +81,12 @@ class WPPB_ImpEx_Import {
 
 			if ( function_exists( 'wppb_fb_set_importing' ) ) {
 				wppb_fb_set_importing( false );
+			}
+
+			if ( $this->templates_sanitized ) {
+				$this->import_messages[$this->j]['message'] = __( 'Some imported User Listing template markup was removed because your account cannot save unfiltered HTML. Templates that could not be made safe were left empty and fall back to the default template.', 'profile-builder' );
+				$this->import_messages[$this->j]['type'] = 'error';
+				$this->j++;
 			}
 
 			// Repoint wppb_default_form_ids — new IDs are not in the export.
@@ -106,6 +114,33 @@ class WPPB_ImpEx_Import {
 		$restored = @unserialize( trim( $value ), array( 'allowed_classes' => false ) );
 
 		return $this->drop_incomplete_objects( $restored );
+	}
+
+	/**
+	 * Run imported User Listing templates through the template editor's sanitizer.
+	 *
+	 * The templates render as raw HTML, so an importer without unfiltered_html must not
+	 * store markup the editor would refuse. Importers with unfiltered_html keep raw markup.
+	 * add_post_meta() unslashes its key and value, so the unslashed key that gets stored
+	 * is what is matched and the unslashed value is what is sanitized.
+	 *
+	 * @param string $key   Meta key.
+	 * @param mixed  $value Restored meta value, as passed to add_post_meta().
+	 * @return mixed
+	 */
+	private function sanitize_template_meta( $key, $value ) {
+		if ( ! is_string( $value ) || ! function_exists( 'wppb_ul_kses_template' ) || ! preg_match( '/^wppb-(single-)?ul-templates$|^wppb-ul-.+-(all-users|single-user)-template$/', wp_unslash( $key ) ) ) {
+			return $value;
+		}
+
+		$template  = wp_unslash( $value );
+		$sanitized = wppb_ul_kses_template( $template );
+
+		if ( $sanitized !== $template ) {
+			$this->templates_sanitized = true;
+		}
+
+		return wp_slash( $sanitized );
 	}
 
 	/**

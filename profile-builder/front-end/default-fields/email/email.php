@@ -44,7 +44,7 @@ function wppb_email_handler( $output, $form_location, $field, $user_id, $field_c
                 $cancel_request_url = add_query_arg($arr_params, $current_url);
                 $pending_new_email_address = apply_filters('wppb_new_email_address','');
 
-                $output .= '<span class="wppb-description-delimiter">' . sprintf(__('There is a pending change request of your email to: %s', 'profile-builder'), '<strong>' . $pending_new_email_address . '</strong>');
+                $output .= '<span class="wppb-description-delimiter">' . sprintf(__('There is a pending change request of your email to: %s', 'profile-builder'), '<strong>' . esc_html( $pending_new_email_address ) . '</strong>');
                 $output .= '<a class="wppb-cancel-request" style="float: right;" href="' . esc_url($cancel_request_url) . '">' . __('Cancel request', 'profile-builder') . '</a></span>';
             }
         }
@@ -108,10 +108,10 @@ function wppb_check_email_value( $message, $field, $request_data, $form_location
                     parse_str($url_parts['query'], $query);
                 }
 
-                if (isset($_GET['edit_user']) && !empty($_GET['edit_user'])) {
+                if (!empty($_GET['edit_user']) && wppb_current_user_can_edit_other_user(absint($_GET['edit_user']))) {
                     $current_user_id = absint($_GET['edit_user']);
-                } elseif (defined('DOING_AJAX') && DOING_AJAX && isset($query['edit_user']) && !empty($query['edit_user'])) {
-                    $current_user_id = $query['edit_user'];
+                } elseif (defined('DOING_AJAX') && DOING_AJAX && !empty($query['edit_user']) && wppb_current_user_can_edit_other_user(absint($query['edit_user']))) {
+                    $current_user_id = absint($query['edit_user']);
                 } else {
                     $current_user = wp_get_current_user();
                     $current_user_id = $current_user->ID;

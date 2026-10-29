@@ -58,6 +58,16 @@ function wppb_avatar_handler( $output, $form_location, $field, $user_id, $field_
         else
             $input_value = !empty( $_POST[$field['meta-name']] ) ? sanitize_text_field( $_POST[$field['meta-name']] ) : '';
 
+        /* the request can name any attachment, so neither the preview nor the output filter may see one the viewer could not save for this user */
+        if ( $form_location == 'register' || $from_request ) {
+            $attachment_ids = array();
+            foreach ( explode( ',', (string) $input_value ) as $value ) {
+                if ( wppb_verify_attachment_id( $value, $user_id ) )
+                    $attachment_ids[] = absint( $value );
+            }
+            $input_value = implode( ',', $attachment_ids );
+        }
+
         if ( $form_location != 'back_end' ){
             $error_mark = ( ( $field['required'] == 'Yes' ) ? '<span class="wppb-required" title="'.wppb_required_field_error($field["field-title"]).'">*</span>' : '' );
 

@@ -78,7 +78,7 @@ class PB_Elementor_User_Listing_Widget extends PB_Elementor_Widget {
         );
         foreach( $wppb_manage_fields as $value ){
             if( $value['meta-name'] ) {
-                $meta_names[$value['meta-name']] = $value['meta-name'];
+                $meta_names[$value['meta-name']] = esc_html( $value['meta-name'] );
             }
         }
 
@@ -94,7 +94,7 @@ class PB_Elementor_User_Listing_Widget extends PB_Elementor_Widget {
 	    $userlisting_posts = get_posts( array( 'posts_per_page' => -1, 'post_status' =>'publish', 'post_type' => 'wppb-ul-cpt', 'orderby' => 'post_date', 'order' => 'ASC' ) );
 	    if( !empty( $userlisting_posts ) ){
 		    foreach ( $userlisting_posts as $post ){
-			    $ul_names[ $post->post_name ] = $post->post_title;
+			    $ul_names[ $post->post_name ] = esc_html( $post->post_title );
 		    }
 		}
 

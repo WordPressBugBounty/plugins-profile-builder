@@ -1563,6 +1563,7 @@
 <?php __("You will be redirected in 5 seconds. If not, click %%.", "profile-builder"); ?>
 <?php __("<strong>You can only login with social accounts, not register!</strong><br>Please link your social account to an existing user account first.", "profile-builder"); ?>
 <?php __("Wrong password!", "profile-builder"); ?>
+<?php __("Please log in using the login form.", "profile-builder"); ?>
 <?php __("Please enter a valid email!", "profile-builder"); ?>
 <?php __("You can only login on this form.<br>Register with your social account on the register form.", "profile-builder"); ?>
 <?php __("Continue", "profile-builder"); ?>
@@ -2042,6 +2043,7 @@
 <?php __("You cannot disable Two-Factor Authentication as it is required for your role.", "profile-builder"); ?>
 <?php __("Two-Factor Authentication has been successfully set up!", "profile-builder"); ?>
 <?php __("Continue to your destination", "profile-builder"); ?>
+<?php __("The Two-Factor Authentication secret could not be verified. Please reload the page and try again.", "profile-builder"); ?>
 <?php __("Please verify TOTP to edit your profile.", "profile-builder"); ?>
 <?php __("Please verify TOTP to change Two-Factor Authentication settings", "profile-builder"); ?>
 <?php __("Please verify TOTP to set up Two-Factor Authentication", "profile-builder"); ?>
@@ -2280,12 +2282,14 @@
 <?php __("Preference", "profile-builder"); ?>
 <?php __("You are not allowed to do this!", "profile-builder"); ?>
 <?php __("Uploaded file is not valid json!", "profile-builder"); ?>
+<?php __("Some imported User Listing template markup was removed because your account cannot save unfiltered HTML. Templates that could not be made safe were left empty and fall back to the default template.", "profile-builder"); ?>
 <?php __("You do not have the capabilities required to do this!", "profile-builder"); ?>
 <?php __("Please select a .json file to import!", "profile-builder"); ?>
 <?php __("Import successfully!", "profile-builder"); ?>
 <?php __("Page will refresh in 3 seconds...", "profile-builder"); ?>
 <?php __("Author Details", "profile-builder"); ?>
 <?php __("This add-on can not be activated back without a valid license. Are you sure you want to deactivate it?", "profile-builder"); ?>
+<?php __("The template was not saved because its Mustache tags could turn it into unsafe HTML when rendered. The previous template was kept.", "profile-builder"); ?>
 <?php __("Add Entry", "profile-builder"); ?>
 <?php __("Delete this item", "profile-builder"); ?>
 <?php __("Please enter a value for the required field ", "profile-builder"); ?>
@@ -2375,6 +2379,7 @@
 <?php __("Select an option", "profile-builder"); ?>
 <?php __("Resend activation email", "profile-builder"); ?>
 <?php __("No sign-up was made with that email!", "profile-builder"); ?>
+<?php __("An activation email was already sent recently. Please check your inbox or try again later.", "profile-builder"); ?>
 <?php __("Activation email sent!", "profile-builder"); ?>
 <?php __("Admin Approval List", "profile-builder"); ?>
 <?php __("Allow users with \"delete_users\" capability to view the Admin Approval list.", "profile-builder"); ?>
@@ -2488,6 +2493,11 @@
 <?php __("Check the \"Remember Me\" checkbox on Login forms, by default.", "profile-builder"); ?>
 <?php __("Password Reset Auto-Login", "profile-builder"); ?>
 <?php __("Automatically log in users after they reset their password using the Recover Password form.", "profile-builder"); ?>
+<?php __("Ask for Captcha After Failed Login Attempts", "profile-builder"); ?>
+<?php __("Show the captcha on Login forms only after a visitor fails to log in.", "profile-builder"); ?>
+<?php __("Applies to the reCAPTCHA or Turnstile field when it is set to display on the Profile Builder Login form or the default WordPress Login form.", "profile-builder"); ?>
+<?php __("Failed Login Attempts", "profile-builder"); ?>
+<?php __("Number of failed login attempts from the same IP address before the captcha is shown. The count resets after one hour without a failed attempt. This needs each visitor's real IP address. If your site is behind a proxy or CDN, such as Cloudflare, that doesn't pass it on to WordPress, visitors share the proxy's address, so their failed logins are counted together and the captcha can show for visitors who never failed a login.", "profile-builder"); ?>
 <?php __("Remove Profile Page Validation", "profile-builder"); ?>
 <?php __("Remove validation from back-end Profile page.", "profile-builder"); ?>
 <?php __("Edit Users Selector", "profile-builder"); ?>

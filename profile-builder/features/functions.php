@@ -1180,6 +1180,38 @@ function wppb_prune_captcha_prevalidations( $saved ) {
     return $saved;
 }
 
+function wppb_login_captcha_required( $provider, $form ) {
+    $settings_keys = array(
+        'reCAPTCHA' => array( 'pb_login' => 'captcha-pb-forms',   'default_wp_login' => 'captcha-wp-forms' ),
+        'Turnstile' => array( 'pb_login' => 'turnstile-pb-forms', 'default_wp_login' => 'turnstile-wp-forms' ),
+    );
+
+    $field = ( $provider == 'reCAPTCHA' ) ? wppb_get_recaptcha_field() : wppb_get_turnstile_field();
+
+    if ( empty( $field ) )
+        return false;
+
+    $key     = $settings_keys[ $provider ][ $form ];
+    $enabled = isset( $field[ $key ] ) && strpos( $field[ $key ], $form ) !== false;
+
+    /* A Login form is processed on init, before the main query sets up the post, and page builders swap the global post
+    while they render headers and footers. So display and validation both judge the page the form posts back to. */
+    if ( ! $enabled && $provider == 'reCAPTCHA' && $form == 'pb_login' && isset( $field['captcha-pb-forms'] ) && $field['recaptcha-type'] == 'v3' )
+        $enabled = wppb_maybe_enable_recaptcha_v3_on_form( $field, url_to_postid( wppb_curpageurl() ) );
+
+    return $enabled && apply_filters( 'wppb_login_captcha_required', true, $provider, $form );
+}
+
+function wppb_submitted_login_form() {
+    if ( isset( $_REQUEST['wppb_login'] ) && isset( $_POST['CSRFToken-wppb'] ) && wp_verify_nonce( sanitize_text_field( $_POST['CSRFToken-wppb'] ), 'wppb_login' ) )
+        return 'pb_login';
+
+    if ( isset( $_REQUEST['pms_login'] ) && isset( $_POST['pms_login_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_POST['pms_login_nonce'] ), 'pms_login_form_nonce' ) )
+        return 'pms_login';
+
+    return 'default_wp_login';
+}
+
 /* Function for displaying reCAPTCHA error on Login and Recover Password forms */
 function wppb_recaptcha_field_error($field_title='') {
 
@@ -1655,7 +1687,7 @@ function wppb_current_user_can_edit_other_user( $user_id ) {
 	}
 
 	if ( ! is_multisite() ) {
-		return current_user_can( 'edit_users' );
+		return current_user_can( 'edit_user', $user_id );
 	}
 
 	if ( is_super_admin() ) {
@@ -2049,7 +2081,7 @@ function wppb_gdpr_delete_user() {
 
 	if( isset( $_GET['wppb_user'] ) && ! empty( $_GET['wppb_user'] ) ) {
 		$edited_user_id = get_current_user_id();
-		if ( ( ! is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && current_user_can( 'manage_network' ) ) ) {
+		if ( current_user_can( 'delete_user', absint( $_GET['wppb_user'] ) ) ) {
 			$edited_user_id = absint( $_GET['wppb_user'] );
 		}
 

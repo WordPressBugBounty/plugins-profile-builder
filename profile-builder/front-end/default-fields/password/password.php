@@ -167,7 +167,7 @@ function wppb_password_add_current_password_error_class( $classes, $field ) {
 
 	$user_id = get_current_user_id();
 
-	if ( ! empty( $_REQUEST['edit_user'] ) && wppb_current_user_can_edit_other_user( $_REQUEST['edit_user'] ) ) {
+	if ( ! empty( $_REQUEST['edit_user'] ) && wppb_current_user_can_edit_other_user( absint( $_REQUEST['edit_user'] ) ) ) {
 		$user_id = absint( $_REQUEST['edit_user'] );
 	}
 

@@ -26,8 +26,12 @@ function wppb_gdprcp_handler( $output, $form_location, $field, $user_id, $field_
         else
             $input_value = ( !empty( $field['default-options'] ) ? array_map( 'trim', explode( ',', $field['default-options'] ) ) : array() );
 
-        if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) && !empty( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) )
+        if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) && !empty( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) ){
             $input_value = $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ];
+
+            if( !is_array( $input_value ) )
+                $input_value = array_map( 'trim', explode( ',', $input_value ) );
+        }
 
         $extra_attr = apply_filters( 'wppb_extra_attribute', '', $field, $form_location );
 
@@ -111,7 +115,7 @@ function wppb_process_gdprcp_value( $field, $request_data ){
     $checkbox_values = '';
     $allowed_values = array( 'email', 'sms', 'phone', 'post' );
 
-    if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) ){
+    if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) && is_array( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) ){
 
         $checkbox_values = $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ];
 
@@ -140,7 +144,7 @@ function wppb_check_gdprcp_value( $message, $field, $request_data, $form_locatio
     if( $field['field'] == 'GDPR Communication Preferences' ){
         $checked_values = '';
 
-        if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) )
+        if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) && is_array( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) )
             $checked_values = implode( ',', $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] );
 
         if ( ( $field['required'] == 'Yes' ) && empty( $checked_values ) ){

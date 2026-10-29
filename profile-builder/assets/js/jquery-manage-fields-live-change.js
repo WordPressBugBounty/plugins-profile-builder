@@ -712,21 +712,21 @@ function wppb_hide_all ( container_name ){
 function wppb_disable_add_entry_button( container_name ){
 	jQuery( container_name + ' ' + '.mb-list-entry-fields .button-primary' ).each( function(){
 
-		//jQuery(this).data('myclick', this.onclick );
-		this.onclick = function(event) {
-			if ( jQuery(this).attr( 'disabled' ) ) {
+		var button = this;
+
+		if ( button.wppbClickGuardApplied ) {
+			return;
+		}
+		button.wppbClickGuardApplied = true;
+
+		var originalOnclick = button.onclick;
+		button.onclick = function( event ) {
+			if ( jQuery( button ).attr( 'disabled' ) ) {
 				return false;
 			}
-			/* changed this in version 2.5.0 because the commented line generated stack exceeded error when multiple fields were opened with edit */
-			if ( typeof( event.currentTarget ) == 'undefined' ){
-				// Repeater field triggered the click event of the "Add Field" / "Save changes" buttons, so the onclick attribute is in the target, not currentTarget
-				eval(event.target.getAttribute('onclick'));
-			}else {
-				// normal Manage Fields Add Field button press
-				eval(event.currentTarget.getAttribute('onclick'));
+			if ( typeof originalOnclick === 'function' ) {
+				return originalOnclick.call( button, event || window.event );
 			}
-
-			//jQuery(this).data('myclick').call(this, event || window.event);
 		};
 	});
 

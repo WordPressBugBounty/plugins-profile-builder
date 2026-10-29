@@ -330,6 +330,9 @@ class WPPB_Elementor {
 	// Render an Elementor template based on ID
 	// Based on Elementor Pro template shortcode
 	public function render_template( $id ) {
+		if( ! wppb_content_restriction_user_can_view_template( $id ) )
+			return '';
+
 		return Elementor\Plugin::instance()->frontend->get_builder_content_for_display( $id, true );
 	}
 

@@ -232,6 +232,9 @@ if( !class_exists('WPPB_toolbox') ){
 
             }
 
+            if( isset( $settings['captcha-after-failed-logins-attempts'] ) )
+                $settings['captcha-after-failed-logins-attempts'] = wppb_toolbox_parse_failed_login_attempts( $settings['captcha-after-failed-logins-attempts'] );
+
             if( isset( $settings['modify-permalinks-single'] ) )
                 $settings['modify-permalinks-single'] = sanitize_text_field( $settings['modify-permalinks-single'] );
 

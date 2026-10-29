@@ -156,7 +156,7 @@ function wppb_blog_details_handler( $output, $form_location, $field, $user_id, $
         if ( $blog_privacy_input_value === trim( $value ) )
             $output .= ' checked';
 
-        $output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'. trim( $radio_values[$key] ) .'</label></li>';
+        $output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'. esc_html( trim( $radio_values[$key] ) ) .'</label></li>';
     }
     $output .= '</ul>' . $is_error . '</li>';
 

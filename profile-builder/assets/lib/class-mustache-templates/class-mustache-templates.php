@@ -177,6 +177,8 @@ class PB_Mustache_Generate_Admin_Box{
 
 		add_action( 'wck_before_meta_boxes', array( $this, 'wppb_mustache_page_before' ) );
 		add_action( 'wck_after_meta_boxes', array( $this, 'wppb_mustache_page_after' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'wppb_rejected_template_notice' ) );
+		add_filter( 'removable_query_args', array( __CLASS__, 'wppb_removable_query_args' ) );
 	}
 
 	/**
@@ -579,20 +581,105 @@ class PB_Mustache_Generate_Admin_Box{
 				}
 
 				if ( $new && $new != $old ) {
-					if ( is_array( $new ) ) {
-						foreach ( $new as &$item ) {
-							//$item = esc_attr( $item );
-						}
-						unset( $item );
-					} else {
-						//$new = esc_attr( $new );
-					}
+					$new = $this->wppb_sanitize_saved_meta_value( $new, $old );
 					update_post_meta( $post_id, $field['id'], $new );
 				} elseif ( '' == $new && $old ) {
 					delete_post_meta( $post_id, $field['id'], $old );
 				}
 			}
 		} // end foreach
+	}
+
+	private function wppb_sanitize_saved_meta_value( $value, $old = '' ) {
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $value;
+		}
+
+		$allowed = apply_filters( 'wppb_mustache_template_allowed_html', wp_kses_allowed_html( 'post' ), $this );
+
+		if ( is_array( $value ) ) {
+			foreach ( $value as $key => $item ) {
+				if ( is_string( $item ) ) {
+					$old_item = ( is_array( $old ) && isset( $old[ $key ] ) && is_string( $old[ $key ] ) ) ? $old[ $key ] : '';
+					$value[ $key ] = wp_slash( self::wppb_kses_mustache_template( wp_unslash( $item ), $old_item, $allowed ) );
+				}
+			}
+			return $value;
+		}
+
+		if ( is_string( $value ) ) {
+			return wp_slash( self::wppb_kses_mustache_template( wp_unslash( $value ), is_string( $old ) ? $old : '', $allowed ) );
+		}
+
+		return $value;
+	}
+
+	/**
+	 * kses the markup a mustache template writes itself. Mustache comments are dropped
+	 * first, and the template is rejected ($old is returned) when either render extreme
+	 * (all sections kept, or all dropped) would not survive kses. The values that
+	 * unescaped {{{ }}} and {{& }} tags insert are not checked here; they rely on each
+	 * field's own sanitizing. $src, $old and the return value are unslashed. Shared with
+	 * the User Listing theme-reactivation path.
+	 */
+	public static function wppb_kses_mustache_template( $src, $old, $allowed ) {
+		// Mustache comments always render to nothing, so drop them before kses; otherwise
+		// a comment can split a dangerous protocol and hide it from the attribute check.
+		$src   = preg_replace( '/\{\{!.*?\}\}/s', '', $src );
+		$clean = wp_kses( $src, $allowed );
+
+		// kses sees the template source, but Mustache sections add or remove text at render
+		// time and can change what kses approved. Reject the save if either render extreme
+		// (all sections kept, or all sections dropped) would not itself survive kses.
+		if ( ! self::wppb_mustache_render_safe_under_kses( $clean, $allowed ) ) {
+			add_filter( 'redirect_post_location', array( __CLASS__, 'wppb_flag_rejected_template' ) );
+			return is_string( $old ) ? $old : '';
+		}
+
+		return $clean;
+	}
+
+	public static function wppb_flag_rejected_template( $location ) {
+		return add_query_arg( 'wppb_template_rejected', '1', $location );
+	}
+
+	public static function wppb_removable_query_args( $args ) {
+		$args[] = 'wppb_template_rejected';
+		return $args;
+	}
+
+	public static function wppb_rejected_template_notice() {
+		if ( empty( $_GET['wppb_template_rejected'] ) ) {
+			return;
+		}
+
+		echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'The template was not saved because its Mustache tags could turn it into unsafe HTML when rendered. The previous template was kept.', 'profile-builder' ) . '</p></div>';
+	}
+
+	private static function wppb_mustache_render_safe_under_kses( $template, $allowed ) {
+		foreach ( array( self::wppb_mustache_project( $template, false ), self::wppb_mustache_project( $template, true ) ) as $probe ) {
+			if ( wp_kses( $probe, $allowed ) !== $probe ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static function wppb_mustache_project( $template, $drop_section_content ) {
+		$out = preg_replace( '/\{\{!.*?\}\}/s', '', $template );
+
+		if ( $drop_section_content ) {
+			$prev = null;
+			$guard = 0;
+			while ( $prev !== $out && $guard < 50 ) {
+				$prev = $out;
+				$out  = preg_replace( '/\{\{[#^]\s*[^}]*\}\}.*?\{\{\/\s*[^}]*\}\}/s', '', $out );
+				$guard++;
+			}
+		}
+
+		// Strip any remaining Mustache tags (section markers and variables), keeping text.
+		return preg_replace( '/\{\{\{[^}]*\}\}\}|\{\{[#^\/>&]?\s*[^}]*\}\}/s', '', $out );
 	}
 
 

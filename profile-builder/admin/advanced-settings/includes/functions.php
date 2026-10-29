@@ -19,6 +19,10 @@ function wppb_toolbox_get_settings( $context, $setting ) {
     return false;
 }
 
+function wppb_toolbox_parse_failed_login_attempts( $raw ) {
+    return is_numeric( $raw ) ? max( 1, (int) $raw ) : 3;
+}
+
 
 /**
  * Clean unnecessary extra post meta from unrelated posts

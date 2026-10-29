@@ -19,6 +19,9 @@ function wppb_checkbox_handler( $output, $form_location, $field, $user_id, $fiel
 
         if( isset( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) && !empty( $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ] ) ){
             $input_value = $request_data[ wppb_handle_meta_name( $field['meta-name'] ) ];
+
+            if( !is_array( $input_value ) )
+                $input_value = array_map( 'trim', explode( ',', $input_value ) );
         }
 
         $input_value = apply_filters( 'wppb_form_checkbox_field_value', $input_value, $field, $form_location );
@@ -44,7 +47,7 @@ function wppb_checkbox_handler( $output, $form_location, $field, $user_id, $fiel
                             if (in_array(trim($value), $input_value))
                                 $output .= ' checked';
 
-                            $output .= ' /><label for="' . Wordpress_Creation_Kit_PB::wck_generate_slug(trim($value)) . '_' . $field['id'] . '" class="wppb-rc-value">' . ((!isset($checkbox_labels[$key]) || !$checkbox_labels[$key]) ? trim($checkbox_values[$key]) : trim($checkbox_labels[$key])) . '</label></li>';
+                            $output .= ' /><label for="' . Wordpress_Creation_Kit_PB::wck_generate_slug(trim($value)) . '_' . $field['id'] . '" class="wppb-rc-value">' . ((!isset($checkbox_labels[$key]) || !$checkbox_labels[$key]) ? esc_html(trim($checkbox_values[$key])) : wp_kses_post(trim($checkbox_labels[$key]))) . '</label></li>';
                         }
                     }
 				$output .= '</ul>';
@@ -67,7 +70,7 @@ function wppb_checkbox_handler( $output, $form_location, $field, $user_id, $fiel
                                 if (in_array(trim($value), $input_value))
                                     $output .= ' checked';
 
-                                $output .= ' /><label for="' . Wordpress_Creation_Kit_PB::wck_generate_slug(trim($value)) . '_' . $field['id'] . '" class="wppb-rc-value">' . ((!isset($checkbox_labels[$key]) || !$checkbox_labels[$key]) ? trim($checkbox_values[$key]) : trim($checkbox_labels[$key])) . '</label></li>';
+                                $output .= ' /><label for="' . Wordpress_Creation_Kit_PB::wck_generate_slug(trim($value)) . '_' . $field['id'] . '" class="wppb-rc-value">' . ((!isset($checkbox_labels[$key]) || !$checkbox_labels[$key]) ? esc_html(trim($checkbox_values[$key])) : wp_kses_post(trim($checkbox_labels[$key]))) . '</label></li>';
                             }
                         }
 						$output .= '</ul>

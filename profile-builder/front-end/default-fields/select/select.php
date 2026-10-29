@@ -43,7 +43,7 @@ function wppb_select_handler( $output, $form_location, $field, $user_id, $field_
 					if ( $input_value === trim( $value ) )
 						$output .= ' selected';
 
-					$output .= '>'.( ( !isset( $select_labels[$key] ) || !$select_labels[$key] ) ? trim( $select_values[$key] ) : trim( $select_labels[$key] ) ).'</option>';
+					$output .= '>'.( ( !isset( $select_labels[$key] ) || !$select_labels[$key] ) ? esc_html( trim( $select_values[$key] ) ) : wp_kses_post( trim( $select_labels[$key] ) ) ).'</option>';
 				}
 				
 				$output .= '
@@ -66,7 +66,7 @@ function wppb_select_handler( $output, $form_location, $field, $user_id, $field_
 								if ( $input_value === trim( $value ) )
 									$output .= ' selected';
 
-								$output .= '>'.( ( !isset( $select_labels[$key] ) || !$select_labels[$key] ) ? trim( $select_values[$key] ) : trim( $select_labels[$key] ) ).'</option>';
+								$output .= '>'.( ( !isset( $select_labels[$key] ) || !$select_labels[$key] ) ? esc_html( trim( $select_values[$key] ) ) : wp_kses_post( trim( $select_labels[$key] ) ) ).'</option>';
 							}
 
 							$output .= '</select>

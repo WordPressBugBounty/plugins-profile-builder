@@ -39,7 +39,7 @@ function wppb_radio_handler( $output, $form_location, $field, $user_id, $field_c
 						if ( $input_value === trim( $value ) )
 							$output .= ' checked';
 
-						$output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'.( ( !isset( $radio_labels[$key] ) || !$radio_labels[$key] ) ? trim( $radio_values[$key] ) : trim( $radio_labels[$key] ) ).'</label></li>';
+						$output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'.( ( !isset( $radio_labels[$key] ) || !$radio_labels[$key] ) ? esc_html( trim( $radio_values[$key] ) ) : wp_kses_post( trim( $radio_labels[$key] ) ) ).'</label></li>';
 					}
 					$output .= '</ul>';
 
@@ -60,7 +60,7 @@ function wppb_radio_handler( $output, $form_location, $field, $user_id, $field_c
 								if ( $input_value === trim( $value ) )
 									$output .= ' checked';
 
-								$output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'.( ( !isset( $radio_labels[$key] ) || !$radio_labels[$key] ) ? trim( $radio_values[$key] ) : trim( $radio_labels[$key] ) ).'</label></li>';
+								$output .= ' /><label for="'.Wordpress_Creation_Kit_PB::wck_generate_slug( trim( $value ) ).'_'.$field['id'].'" class="wppb-rc-value">'.( ( !isset( $radio_labels[$key] ) || !$radio_labels[$key] ) ? esc_html( trim( $radio_values[$key] ) ) : wp_kses_post( trim( $radio_labels[$key] ) ) ).'</label></li>';
 							}
 
 							$output .= '

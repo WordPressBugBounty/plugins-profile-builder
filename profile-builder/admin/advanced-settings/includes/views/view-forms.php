@@ -352,6 +352,27 @@
             </div>
 
             <div class="cozmoslabs-form-field-wrapper cozmoslabs-toggle-switch">
+                <label class="cozmoslabs-form-field-label" for="toolbox-captcha-after-failed-logins"><?php esc_html_e('Ask for Captcha After Failed Login Attempts', 'profile-builder'); ?></label>
+
+                <div class="cozmoslabs-toggle-container">
+                    <input type="checkbox" id="toolbox-captcha-after-failed-logins" name="wppb_toolbox_forms_settings[captcha-after-failed-logins]"<?php echo ( ( isset( $settings['captcha-after-failed-logins'] ) && ( $settings['captcha-after-failed-logins'] == 'yes' ) ) ? ' checked' : '' ); ?> value="yes">
+                    <label class="cozmoslabs-toggle-track" for="toolbox-captcha-after-failed-logins"></label>
+                </div>
+
+                <div class="cozmoslabs-toggle-description">
+                    <label for="toolbox-captcha-after-failed-logins" class="cozmoslabs-description"><?php esc_html_e( 'Show the captcha on Login forms only after a visitor fails to log in.', 'profile-builder' ); ?></label>
+                </div>
+
+                <p class="cozmoslabs-description cozmoslabs-description-space-left"><?php esc_html_e( 'Applies to the reCAPTCHA or Turnstile field when it is set to display on the Profile Builder Login form or the default WordPress Login form.', 'profile-builder' ); ?></p>
+            </div>
+
+            <div class="cozmoslabs-form-field-wrapper" id="wppb-toolbox-captcha-after-failed-logins-attempts">
+                <label class="cozmoslabs-form-field-label" for="toolbox-captcha-after-failed-logins-attempts"><?php esc_html_e('Failed Login Attempts', 'profile-builder'); ?></label>
+                <input type="number" min="1" step="1" id="toolbox-captcha-after-failed-logins-attempts" name="wppb_toolbox_forms_settings[captcha-after-failed-logins-attempts]" value="<?php echo esc_attr( wppb_toolbox_parse_failed_login_attempts( isset( $settings['captcha-after-failed-logins-attempts'] ) ? $settings['captcha-after-failed-logins-attempts'] : false ) ); ?>">
+                <p class="cozmoslabs-description cozmoslabs-description-space-left"><?php esc_html_e( 'Number of failed login attempts from the same IP address before the captcha is shown. The count resets after one hour without a failed attempt. This needs each visitor\'s real IP address. If your site is behind a proxy or CDN, such as Cloudflare, that doesn\'t pass it on to WordPress, visitors share the proxy\'s address, so their failed logins are counted together and the captcha can show for visitors who never failed a login.', 'profile-builder' ); ?></p>
+            </div>
+
+            <div class="cozmoslabs-form-field-wrapper cozmoslabs-toggle-switch">
                 <label class="cozmoslabs-form-field-label" for="toolbox-back-end-validation"><?php esc_html_e('Remove Profile Page Validation', 'profile-builder'); ?></label>
 
                 <div class="cozmoslabs-toggle-container">

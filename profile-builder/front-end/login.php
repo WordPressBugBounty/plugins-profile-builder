@@ -11,7 +11,7 @@ function wppb_process_login(){
 	do_action( "login_form_login" );
 	do_action( 'wppb_process_login_start' );
 
-	if( !isset( $_POST['CSRFToken-wppb'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['CSRFToken-wppb'] ), 'wppb_login' ) )
+	if( wppb_submitted_login_form() != 'pb_login' )
 	    return;
 
 	$secure_cookie = '';
@@ -282,36 +282,28 @@ function wppb_resend_confirmation_email() {
 
     $user_email = base64_decode( sanitize_text_field( $_GET['email'] ));
 
-    $transient_check_key = Wordpress_Creation_Kit_PB::wck_generate_slug( $user_email );
-    $transient_check = get_transient('wppb_confirmation_email_already_sent_'.$transient_check_key);
+    if ( !isset( $_GET['_wpnonce'] ) || !wp_verify_nonce(sanitize_text_field( $_GET['_wpnonce'] ), 'wppb_confirmation_url_nonce' ))
+        return;
 
-    if ( $transient_check === false ) {
+    include_once(plugin_dir_path(__FILE__) . '../features/email-confirmation/email-confirmation.php');
 
-        if ( !isset( $_GET['_wpnonce'] ) || !wp_verify_nonce(sanitize_text_field( $_GET['_wpnonce'] ), 'wppb_confirmation_url_nonce' ))
-            return;
+    if ( file_exists( WPPB_PLUGIN_DIR . '/assets/lib/class-mustache-templates/class-mustache-templates.php' ) )
+        include_once( WPPB_PLUGIN_DIR . '/assets/lib/class-mustache-templates/class-mustache-templates.php' );
 
-        include_once(plugin_dir_path(__FILE__) . '../features/email-confirmation/email-confirmation.php');
+    global $wpdb;
+    $sql_result = $wpdb->get_row( $wpdb->prepare("SELECT * FROM " . $wpdb->base_prefix . "signups WHERE user_email = %s", $user_email ), ARRAY_A );
 
-        if ( file_exists( WPPB_PLUGIN_DIR . '/assets/lib/class-mustache-templates/class-mustache-templates.php' ) )
-            include_once( WPPB_PLUGIN_DIR . '/assets/lib/class-mustache-templates/class-mustache-templates.php' );
-
-        global $wpdb;
-        $sql_result = $wpdb->get_row( $wpdb->prepare("SELECT * FROM " . $wpdb->base_prefix . "signups WHERE user_email = %s", $user_email ), ARRAY_A );
-
-        // if the email address exists in wp_signups table, resend Confirmation Email and redirect to display notification
-        if ( $sql_result ) {
-            wppb_signup_user_notification( sanitize_text_field( $sql_result['user_login'] ), sanitize_email( $sql_result['user_email'] ), $sql_result['activation_key'], $sql_result['meta'] );
-            $transient_key = Wordpress_Creation_Kit_PB::wck_generate_slug( $user_email );
-            set_transient('wppb_confirmation_email_already_sent_' . $transient_key, true, 900 );
-            $error_string = '<strong>' . __( 'SUCCESS: ', 'profile-builder') . '</strong>' . sprintf( __( 'Activation email sent to %s', 'profile-builder' ), $user_email );
-            $wppb_success_message_nonce = wp_create_nonce( 'wppb_login_error_'.$error_string);
-            $current_url = wppb_curpageurl();
-            $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), '_wpnonce' => $wppb_success_message_nonce, 'request_form_location' => 'page', 'wppb_message_type' => 'success');
-            $redirect_to = add_query_arg($arr_params, $current_url);
-            wp_safe_redirect($redirect_to);
-            exit();
-        }
-
+    // if the email address exists in wp_signups table, resend Confirmation Email and redirect to display notification
+    if ( $sql_result && ! wppb_confirmation_email_recently_sent( $sql_result ) ) {
+        wppb_mark_confirmation_email_sent( $sql_result );
+        wppb_signup_user_notification( sanitize_text_field( $sql_result['user_login'] ), sanitize_email( $sql_result['user_email'] ), $sql_result['activation_key'], $sql_result['meta'] );
+        $error_string = '<strong>' . __( 'SUCCESS: ', 'profile-builder') . '</strong>' . sprintf( __( 'Activation email sent to %s', 'profile-builder' ), $user_email );
+        $wppb_success_message_nonce = wp_create_nonce( 'wppb_login_error_'.$error_string);
+        $current_url = wppb_curpageurl();
+        $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), '_wpnonce' => $wppb_success_message_nonce, 'request_form_location' => 'page', 'wppb_message_type' => 'success');
+        $redirect_to = add_query_arg($arr_params, $current_url);
+        wp_safe_redirect($redirect_to);
+        exit();
     }
 }
 add_action('init', 'wppb_resend_confirmation_email');
@@ -402,7 +394,7 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
         $redirect_to = wppb_get_redirect_url( 'normal', 'after_login', $redirect_to, $user );
         $redirect_to = apply_filters( 'wppb_after_login_redirect_url', $redirect_to );
 
-		if ( $redirect_to === '' ){
+		if ( empty( $redirect_to ) ){
 			$redirect_to = $original_redirect_to;
 		}
     }
@@ -413,8 +405,7 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
             // if we don't have a successful login we must redirect to the url of the form, so make sure this happens
             if( isset( $_POST['wppb_request_url'] ) )
                 $redirect_to = wppb_sanitize_request_url( $_POST['wppb_request_url'] );
-            if( isset( $_POST['wppb_form_location'] ) )
-                $request_form_location = sanitize_text_field( $_POST['wppb_form_location'] );
+            $request_form_location = ( isset( $_POST['wppb_form_location'] ) && $_POST['wppb_form_location'] === 'widget' ) ? 'widget' : 'page';
             $error_string = $user->get_error_message();
 
             $wppb_generalSettings = get_option('wppb_general_settings');
@@ -492,7 +483,8 @@ function wppb_login_redirect( $redirect_to, $requested_redirect_to, $user ){
                 $arr_params = array('loginerror' => urlencode(base64_encode($error_string)), '_wpnonce' => $wppb_error_string_nonce, 'request_form_location' => $request_form_location);
             }
 
-            if ($user->get_error_code() == 'wppb_login_auth') {
+            // keep the code field the form already had, since a captcha error ends the login before the 2FA check runs
+            if ($user->get_error_code() == 'wppb_login_auth' || isset($_POST['auth'])) {
                 $arr_params['login_auth'] = 'true';
             }
 

@@ -9,16 +9,14 @@ function wppb_gdpr_delete_handler( $output, $form_location, $field, $user_id, $f
             $item_description = wppb_icl_t( 'plugin profile-builder-pro', 'custom_field_'.$field['id'].'_description_translation', $field['description'], true );
 
             $edited_user_id = get_current_user_id();
-            if( ( !is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && current_user_can( 'manage_network' ) ) ) {
-                if( isset( $_GET['edit_user'] ) && ! empty( $_GET['edit_user'] ) ){
-                    $edited_user_id = absint( $_GET['edit_user'] );
-                }
+            if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( absint( $_GET['edit_user'] ) ) ){
+                $edited_user_id = absint( $_GET['edit_user'] );
             }
 
             $output = '
 			<label for="wppb-delete-account">'. wp_kses_post( $item_title ) .'</label>
 			<input class="wppb-delete-account" type="button" value="'. __( 'Delete', 'profile-builder' ) .'" />';
-            $output .= '<span class="wppb-description-delimiter">'.trim( html_entity_decode ( $item_description ) ).'</span>';
+            $output .= '<span class="wppb-description-delimiter">'.trim( wp_kses_post( html_entity_decode( $item_description ) ) ).'</span>';
 
 
             $delete_url = add_query_arg( array(

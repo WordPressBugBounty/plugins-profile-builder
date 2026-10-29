@@ -427,6 +427,13 @@ function wppb_content_restriction_meta_box_output( $post ) {
 
 }
 
+/* esc_url_raw() leaves "x.php.example.com" without a scheme and wppb_add_missing_http() later turns it into a host, so check the URL the redirect will use */
+function wppb_content_restriction_can_save_redirect_url( $url ) {
+    $is_offsite = ! empty( $url ) && '' === wp_validate_redirect( wppb_add_missing_http( $url ) );
+
+    return ! $is_offsite || wppb_content_restriction_can_store_offsite_redirect( get_current_user_id() );
+}
+
 function wppb_content_restriction_save_data( $post_id ) {
 
     if( empty( $_POST['wppb_content_restriction_token'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['wppb_content_restriction_token'] ), 'wppb_meta_box_single_content_restriction_nonce' ) ) {
@@ -463,7 +470,11 @@ function wppb_content_restriction_save_data( $post_id ) {
         update_post_meta( $post_id, 'wppb-content-restrict-custom-redirect-url-enabled', 'yes' );
     }
 
-    update_post_meta( $post_id, 'wppb-content-restrict-custom-redirect-url', ( ! empty( $_POST['wppb-content-restrict-custom-redirect-url'] ) ? esc_url_raw( $_POST['wppb-content-restrict-custom-redirect-url'] ) : '' ) );
+    $redirect_url = ( ! empty( $_POST['wppb-content-restrict-custom-redirect-url'] ) ? esc_url_raw( $_POST['wppb-content-restrict-custom-redirect-url'] ) : '' );
+
+    if( wppb_content_restriction_can_save_redirect_url( $redirect_url ) ) {
+        update_post_meta( $post_id, 'wppb-content-restrict-custom-redirect-url', $redirect_url );
+    }
 
     // Handle custom messages
     delete_post_meta( $post_id, 'wppb-content-restrict-messages-enabled' );
@@ -536,7 +547,11 @@ function wppb_content_restriction_save_term_data( $term_id, $tt_id = 0, $taxonom
         update_term_meta( $term_id, 'wppb-content-restrict-custom-redirect-url-enabled', 'yes' );
     }
 
-    update_term_meta( $term_id, 'wppb-content-restrict-custom-redirect-url', ( ! empty( $_POST['wppb-content-restrict-custom-redirect-url'] ) ? esc_url_raw( $_POST['wppb-content-restrict-custom-redirect-url'] ) : '' ) );
+    $redirect_url = ( ! empty( $_POST['wppb-content-restrict-custom-redirect-url'] ) ? esc_url_raw( $_POST['wppb-content-restrict-custom-redirect-url'] ) : '' );
+
+    if ( wppb_content_restriction_can_save_redirect_url( $redirect_url ) ) {
+        update_term_meta( $term_id, 'wppb-content-restrict-custom-redirect-url', $redirect_url );
+    }
 
     delete_term_meta( $term_id, 'wppb-content-restrict-messages-enabled' );
     if ( isset( $_POST['wppb-content-restrict-messages-enabled'] ) ) {

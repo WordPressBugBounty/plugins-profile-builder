@@ -196,11 +196,22 @@ function wppb_front_end_register( $atts ){
 
 	/* every builder (shortcode, block, Elementor, Divi) renders post content through here, so the post author decides what the form may do */
 	if( doing_filter( 'the_content' ) ){
-		if( ! wppb_register_form_author_can_publish( get_the_ID() ) )
-			return wppb_register_form_author_not_allowed_message();
+		/* a Query Loop swaps in the looped post before rendering the register block, and loops such as core Latest Posts or
+		   the Divi Builder plugin slider render a looped post's content outside its own the_content, so check the current
+		   post and every post in the_content */
+		$container_ids = wppb_register_form_container_post_ids();
 
-		if( ! wppb_register_form_author_can_assign_role( get_the_ID(), $atts['role'] ) )
-			$atts['role'] = get_option( 'default_role' );
+		foreach( $container_ids as $container_id ){
+			if( ! wppb_register_form_author_can_publish( $container_id ) )
+				return wppb_register_form_author_not_allowed_message();
+		}
+
+		foreach( $container_ids as $container_id ){
+			if( ! wppb_register_form_author_can_assign_role( $container_id, $atts['role'] ) ){
+				$atts['role'] = get_option( 'default_role' );
+				break;
+			}
+		}
 	}
 
     $form = new Profile_Builder_Form_Creator( array( 'form_type' => 'register', 'form_name' => $atts['form_name'], 'role' => ( is_object( get_role( $atts['role'] ) ) ? $atts['role'] : get_option( 'default_role' ) ) , 'redirect_url' => $atts['redirect_url'], 'logout_redirect_url' => $atts['logout_redirect_url'], 'automatic_login' => $atts['automatic_login'], 'redirect_priority' => $atts['redirect_priority'], 'ajax' => $atts['ajax'] ) );
@@ -219,6 +230,107 @@ function wppbc_disable_admin_approval_for_user_role( $user_id ) {
 		wp_set_object_terms( $user_id, NULL, 'user_status' );
 		clean_object_term_cache( $user_id, 'user_status' );
 	}
+}
+
+function wppb_register_push_content_post( $content ){
+	$GLOBALS['wppb_register_content_post_stack'][] = (int) get_the_ID();
+
+	return $content;
+}
+add_filter( 'the_content', 'wppb_register_push_content_post', 0 );
+
+function wppb_register_pop_content_post( $content ){
+	if( ! empty( $GLOBALS['wppb_register_content_post_stack'] ) )
+		array_pop( $GLOBALS['wppb_register_content_post_stack'] );
+
+	return $content;
+}
+add_filter( 'the_content', 'wppb_register_pop_content_post', PHP_INT_MAX );
+
+/* blocks pull text the post author didn't write into the content (excerpts, titles, comments, feeds, shortcodes a nested
+   the_content left escaped), and the do_shortcode() after do_blocks() would turn a register shortcode in that text into a
+   form gated by this post's author, so tag the shortcodes the content has before do_blocks() and disarm untagged ones in
+   the blocks it renders */
+function wppb_register_tag_content_shortcodes( $content ){
+	$GLOBALS['wppb_register_rendering_blocks'][ wppb_register_content_depth() ] = true;
+
+	return wppb_register_tag_shortcodes( $content );
+}
+add_filter( 'the_content', 'wppb_register_tag_content_shortcodes', 8 );
+
+function wppb_register_untag_content_shortcodes( $content ){
+	unset( $GLOBALS['wppb_register_rendering_blocks'][ wppb_register_content_depth() ] );
+
+	return str_replace( '[wppb-register ' . wppb_register_shortcode_tag(), '[wppb-register', $content );
+}
+add_filter( 'the_content', 'wppb_register_untag_content_shortcodes', 10 );
+
+/* per block rather than a the_content filter after do_blocks(), since wp_trim_excerpt() re-adds do_blocks() behind any
+   other priority 9 filter */
+function wppb_register_disarm_block_shortcodes( $block_content ){
+	if( ! wppb_register_rendering_content_blocks() || false === strpos( $block_content, '[wppb-register' ) )
+		return $block_content;
+
+	return preg_replace( '/\[(?=wppb-register(?![\w-])(?! ' . wppb_register_shortcode_tag() . '))/', '&#91;', $block_content );
+}
+add_filter( 'render_block', 'wppb_register_disarm_block_shortcodes' );
+
+/* embed HTML holds the title of the embedded post or remote page, and core embeds before the register shortcodes are
+   tagged, both in the_content (same priority, registered first) and in a synced pattern. &#091; rather than &#91;, since
+   the do_shortcode() that runs [embed] turns &#91; back into [ */
+function wppb_register_disarm_embed_shortcodes( $html ){
+	return preg_replace( '/\[(?=wppb-register(?![\w-]))/', '&#091;', $html );
+}
+add_filter( 'embed_oembed_html', 'wppb_register_disarm_embed_shortcodes' );
+
+/* a synced pattern is its author's content, so its register shortcodes stay when that author could publish them */
+function wppb_register_tag_pattern_shortcodes( $parsed_block, $source_block, $parent_block = null ){
+	if( ! wppb_register_rendering_content_blocks() || empty( $parent_block ) || 'core/block' !== $parent_block->name || empty( $parent_block->parsed_block['attrs']['ref'] ) || ! wppb_register_form_author_can_publish( $parent_block->parsed_block['attrs']['ref'] ) )
+		return $parsed_block;
+
+	array_walk_recursive( $parsed_block, function( &$value ){
+		if( is_string( $value ) )
+			$value = wppb_register_tag_shortcodes( $value );
+	} );
+
+	return $parsed_block;
+}
+add_filter( 'render_block_data', 'wppb_register_tag_pattern_shortcodes', 10, 3 );
+
+function wppb_register_content_depth(){
+	return empty( $GLOBALS['wppb_register_content_post_stack'] ) ? 0 : count( $GLOBALS['wppb_register_content_post_stack'] );
+}
+
+/* only blocks rendered by the innermost the_content's do_blocks(), so block widgets, templates and shortcodes that render
+   blocks keep their register shortcodes */
+function wppb_register_rendering_content_blocks(){
+	return ! empty( $GLOBALS['wppb_register_rendering_blocks'][ wppb_register_content_depth() ] );
+}
+
+function wppb_register_tag_shortcodes( $text ){
+	if( false === strpos( $text, '[wppb-register' ) )
+		return $text;
+
+	$tag = wppb_register_shortcode_tag();
+
+	return preg_replace( '/\[wppb-register(?![\w-])(?! ' . $tag . ')/', '[wppb-register ' . $tag, $text );
+}
+
+/* random per request, so text stored in the database can't carry it */
+function wppb_register_shortcode_tag(){
+	static $tag = null;
+
+	if( null === $tag )
+		$tag = 'wppb' . bin2hex( random_bytes( 8 ) );
+
+	return $tag;
+}
+
+function wppb_register_form_container_post_ids(){
+	$ids   = empty( $GLOBALS['wppb_register_content_post_stack'] ) ? array() : $GLOBALS['wppb_register_content_post_stack'];
+	$ids[] = (int) get_the_ID();
+
+	return array_unique( array_filter( $ids ) );
 }
 
 function wppb_register_form_author_can_publish( $post_id ){

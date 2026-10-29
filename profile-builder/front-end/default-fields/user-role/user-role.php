@@ -81,7 +81,7 @@ function wppb_user_role_handler( $output, $form_location, $field, $user_id, $fie
 
                 if( ! empty( $available_user_roles ) ) {
                     foreach( $available_user_roles as $user_role ) {
-                        $output .= '<option value="'. $user_role['slug'] .'"';
+                        $output .= '<option value="'. esc_attr( $user_role['slug'] ) .'"';
 
                         if( $roles_editor_active && is_array( $input_value_multiple ) ) {
                             if( in_array( $user_role['slug'], $input_value_multiple ) ) {
@@ -91,7 +91,7 @@ function wppb_user_role_handler( $output, $form_location, $field, $user_id, $fie
                             $output .= selected( $input_value, $user_role['slug'], false );
                         }
 
-                        $output .= '>'. translate_user_role( $user_role['name'] ) .'</option>';
+                        $output .= '>'. esc_html( translate_user_role( $user_role['name'] ) ) .'</option>';
                     }
                 }
 

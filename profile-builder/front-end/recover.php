@@ -314,8 +314,8 @@ function wppb_front_end_password_recovery( $atts ){
             $output .= wppb_password_recovery_warning( $warning, 'wppb_recover_password_displayed_message1' );
         } elseif ( !is_email( $username_email ) ){
             // if we do not have an email in the posted date we try to get the email for that user
-            // When filter is enabled and login is set to email only, do not allow username for password reset
-            if ( apply_filters( 'wppb_recover_password_require_email_when_login_with_email', false ) && !empty( $wppb_generalSettings['loginWith'] ) && $wppb_generalSettings['loginWith'] == 'email' ) {
+            // When login is set to email only, the field asks for an email, so reject anything that isn't one (return false from the filter to allow usernames)
+            if ( !empty( $wppb_generalSettings['loginWith'] ) && $wppb_generalSettings['loginWith'] == 'email' && apply_filters( 'wppb_recover_password_require_email_when_login_with_email', true ) ) {
                 $warning = __( 'Please enter your email address to request a password reset.', 'profile-builder' );
                 $warning = apply_filters( 'wppb_recover_password_sent_message_username_not_allowed', $warning );
                 $output .= wppb_password_recovery_warning( $warning, 'wppb_recover_password_displayed_message1' );

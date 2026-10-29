@@ -142,6 +142,7 @@ jQuery(document).ready(function(){
             }
             newuploadAttachments = newuploadAttachments.join(',');
             upload_input.val(newuploadAttachments);
+            wppb_set_upload_proof(upload_input, null, null);
 
             /* remove the attachment details */
             jQuery(this).parent().parent('.upload-field-details').next('a').show();
@@ -174,11 +175,14 @@ function validate_simple_upload(){
             //Check allowed upload type by wordpress
             allowed_mime_types = wppb_allowed_wordpress_formats.allowed_wordpress_formats;
             allowed_by_wordpress = false;
+            /* Several entries can share a MIME type (e.g. a plugin adding 'jfif' => 'image/jpeg'),
+               so collect the extensions of every match instead of keeping only the last one */
+            var possible_extensions = [];
             for (var key in allowed_mime_types){
                 allowed_type = allowed_mime_types[key];
                 if (attachment.type === allowed_type){
                     allowed_by_wordpress = true;
-                    possible_extensions = key.split('|');
+                    possible_extensions = possible_extensions.concat(key.split('|'));
                 }
             }
             if (allowed_by_wordpress) {
@@ -261,7 +265,7 @@ function validate_simple_upload(){
                     contentType: false,
                     processData: false,
                     data: formData,
-                    success: function(response){
+                    success: function(response, textStatus, jqXHR){
                         var parsed;
                         try {
                             parsed = JSON.parse(response);
@@ -273,6 +277,7 @@ function validate_simple_upload(){
                             clearUpload();
                         } else {
                             jQuery("input#"+fieldName).val(parsed);
+                            wppb_set_upload_proof(jQuery("input#"+fieldName), parsed, jqXHR.getResponseHeader('X-WPPB-Upload-Proof'));
                         }
                     },
                     error: function(){
@@ -296,9 +301,22 @@ function validate_simple_upload(){
 
                 function clearUpload(){
                     jQuery("input#"+fieldName).val(null);
+                    wppb_set_upload_proof(jQuery("input#"+fieldName), null, null);
                     jQuery('.wppb_simple_upload', jQuery("input#"+fieldName).parent()).val(null);
                 }
             }
         };
     });
+}
+
+function wppb_set_upload_proof(idInput, attachmentId, proof){
+    idInput.nextAll('input.wppb-upload-proof').remove();
+    if ( attachmentId && proof ) {
+        attachmentId = parseInt(attachmentId, 10);
+        jQuery('<input type="hidden" class="wppb-upload-proof">')
+            .attr('id', 'wppb_upload_proof_' + attachmentId)
+            .attr('name', 'wppb_upload_proof[' + attachmentId + ']')
+            .val(proof)
+            .insertAfter(idInput);
+    }
 }

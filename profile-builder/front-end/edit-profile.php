@@ -25,11 +25,9 @@ function wppb_autologin_after_password_changed(){
             if( !empty( $form_fields ) ){
 
                 $edited_user_id = get_current_user_id();
-                if( ( !is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && current_user_can( 'manage_network' ) ) ) {
-                    if( isset( $_GET['edit_user'] ) && ! empty( $_GET['edit_user'] ) ){
-                        $edited_user_id = absint( $_GET['edit_user'] );
-                    }
-                }   
+                if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( absint( $_GET['edit_user'] ) ) ){
+                    $edited_user_id = absint( $_GET['edit_user'] );
+                }
                 
                 /* check for errors in the form through the filters */
                 $output_field_errors = array();
@@ -43,12 +41,7 @@ function wppb_autologin_after_password_changed(){
                 /* if we have no errors change the password */
                 if( empty( $output_field_errors ) ) {
 
-                    $user_id = get_current_user_id();
-                    if( ( !is_multisite() && current_user_can( 'edit_users' ) ) || ( is_multisite() && current_user_can( 'manage_network' ) ) ) {
-                        if( isset( $_GET['edit_user'] ) && ! empty( $_GET['edit_user'] ) ){
-                            $user_id = absint( $_GET['edit_user'] );
-                        }
-                    }
+                    $user_id = $edited_user_id;
 
                     $session_token = '';
 

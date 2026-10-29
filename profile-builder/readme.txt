@@ -5,7 +5,7 @@ Tags: user registration, user profile, registration, profile, user registration 
 Requires at least: 3.1
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 4.0.5
+Stable tag: 4.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -216,14 +216,18 @@ Privacy Policy: https://www.cozmoslabs.com/privacy-policy/
 17. Edit or Add New User Role
 
 == Changelog ==
-= 4.0.5 =
-* Fix: Security issue where a subsite administrator could edit a Super Admin, or an account that also belongs to another site, through the front-end Edit Profile form. Thanks to Szymon Szymkowiak and the WPScan team
-* Fix: Security issue regarding the redirect URL on Registration, Edit Profile, and password reset forms. Thanks to Jacek Sowiński and the WPScan team
-* Fix: Security issue regarding reCaptcha and Turnstile on the default WordPress comments form when comments are created through XML-RPC or the REST API. Thanks to Naoki Kawahigashi and the WPScan team
-* Fix: Security issue where a role set on a registration form inside post content could grant capabilities the post author does not have. Thanks to Jamir0qai and the Patchstack team
-* Fix: A role set on a registration form inside post content can no longer grant capabilities the post author does not have
-* Fix: Fatal error when opening the block editor on a page that contains the Register block
-* Fix: The Send Credentials checkbox stayed visible when Hidden and checked "Send Credentials" checkbox was enabled and a custom Send Credentials Text was set
-* Fix: Simple Upload inside a Repeater field left the submit button stuck on "Uploading file..." after a repeater group was added
+= 4.0.6 =
+* Enhancement: Added Ask for Captcha After Failed Login Attempts under Advanced Settings -> Forms, so the login captcha stays hidden until the visitor has failed to log in
+* Fix: Security issue where a registration form inside a Query Loop could still grant a role the post author does not have. Thanks to Dthangws and the Patchstack team
+* Fix: Security issue regarding the pending email-change notice on Edit Profile. Thanks to mroccon and the Patchstack team
+* Fix: Security issue where another visitor could claim a file uploaded and not claimed during registration. Thanks to Sangho Lee and the Patchstack team
+* Fix: Improve reliability of Captcha checks and compatibility with different featuress
+* Fix: Register and Edit Profile forms submit on the free plugin when AJAX is enabled, including a Paid Member Subscriptions checkout
+* Fix: Simple Upload accepts a JPEG when another plugin registers that file type under a different extension
+* Fix: Checkbox and GDPR Communication Preferences fields no longer crash when the submitted value is a single value
+* Fix: A restricted static front page shows the restriction message instead of redirecting to itself
+* Misc: PHP 8.5 deprecation notice when content restriction runs with no post ID, and a PHP warning in the form editor when the edited post is missing
+* Misc: The Reset Password form now respects the Email only login setting
+* Misc: Tag forms as AJAX only when it's actually enabled
 
 [Click Here](https://www.cozmoslabs.com/docs/profile-builder/free-changelog/?utm_source=wp.org&utm_medium=pb-description-page&utm_campaign=PBFree) to view the full changelog.

@@ -371,7 +371,21 @@ function wppb_default_fields_make_upload_button( $field, $input_value, $extra_at
     }
 
     $upload_button .= '<input id="'. esc_attr( $upload_input_id ) .'" type="hidden" size="36" name="'. esc_attr( Wordpress_Creation_Kit_PB::wck_generate_slug( $field['meta-name'], $field ) ) .'" value="'. esc_attr( wp_unslash( $input_value ) ) .'"/>';
+
+    $upload_button .= wppb_resubmitted_upload_proof_inputs( $input_value, $_REQUEST );
+
     return $upload_button;
+}
+
+function wppb_resubmitted_upload_proof_inputs( $input_value, $request ) {
+    $inputs = '';
+    foreach ( explode( ',', (string) $input_value ) as $attachment_id ) {
+        $proof = wppb_upload_claim_proof_from_request( $request, $attachment_id );
+        if ( $proof !== '' )
+            $inputs .= '<input type="hidden" class="wppb-upload-proof" id="wppb_upload_proof_' . absint( $attachment_id ) . '" name="wppb_upload_proof[' . absint( $attachment_id ) . ']" value="' . esc_attr( $proof ) . '"/>';
+    }
+
+    return $inputs;
 }
 
 /**
@@ -402,6 +416,12 @@ function wppb_default_fields_save_simple_upload_file( $field_name ) {
         require_once(ABSPATH . 'wp-admin/includes/image.php');
         $attachment_data = wp_generate_attachment_metadata($attachment_id, $file['file']);
         wp_update_attachment_metadata($attachment_id, $attachment_data);
+
+        if ( wp_doing_ajax() && ! headers_sent() ) {
+            header( 'X-WPPB-Upload-Proof: ' . wppb_upload_claim_proof( $attachment_id ) );
+            header( 'Access-Control-Expose-Headers: X-WPPB-Upload-Proof', false );
+        }
+
         return trim($attachment_id);
     } else {
         return '';
@@ -465,6 +485,32 @@ function wppb_legacy_file_url_to_attachment( $file_url, $field, $user_id ) {
     return $attachment_id;
 }
 
+function wppb_upload_claim_proof( $attachment_id ) {
+    $attachment_id = absint( $attachment_id );
+    $attachment    = $attachment_id ? get_post( $attachment_id ) : null;
+    if ( ! $attachment || $attachment->post_type !== 'attachment' ) {
+        return '';
+    }
+
+    return hash_hmac( 'sha256', 'wppb_upload_claim|' . get_current_blog_id() . '|' . $attachment->ID . '|' . $attachment->post_date_gmt, wp_salt( 'auth' ) );
+}
+
+function wppb_upload_claim_proof_from_request( $request, $attachment_id ) {
+    $attachment_id = absint( $attachment_id );
+    if ( ! isset( $request['wppb_upload_proof'][ $attachment_id ] ) || ! is_array( $request['wppb_upload_proof'] ) ) {
+        return '';
+    }
+
+    $proof = $request['wppb_upload_proof'][ $attachment_id ];
+
+    return is_string( $proof ) && hash_equals( wppb_upload_claim_proof( $attachment_id ), $proof ) ? $proof : '';
+}
+
+function wppb_signup_keeps_claimable_upload( $value ) {
+    return wppb_verify_attachment_id( $value ) ? absint( $value ) : '';
+}
+add_filter( 'wppb_add_to_user_signup_form_field_upload', 'wppb_signup_keeps_claimable_upload', 1 );
+
 // Deferred to plugins_loaded so older Profile Builder Pro versions (which declare
 // wppb_verify_attachment_id unconditionally during their own file load) win the
 // declaration race and our function_exists guard then skips — avoiding a fatal.
@@ -472,58 +518,46 @@ add_action( 'plugins_loaded', 'wppb_register_attachment_ownership_helpers', 20 )
 function wppb_register_attachment_ownership_helpers() {
 
     /**
-     * Verifies if an attachment either doesn't exist or already belongs to the user.
+     * Verifies that an attachment may be saved for the user.
      * Used for IDOR protection on both Upload and Avatar fields.
      *
-     * @param string|int $attachment_id The attachment post ID to verify.
-     * @param int|null   $user_id      The user ID to check ownership against.
+     * An administrator may use any attachment. Otherwise the attachment must belong to the target user or
+     * to the current user, or have no author yet and come with its claim proof.
+     *
+     * @param string|int  $attachment_id The attachment post ID to verify.
+     * @param int|null    $user_id       The user ID to check ownership against.
+     * @param string|null $proof         Claim proof for an attachment that has no author. Null reads it from the
+     *                                   current request.
      *
      * @return bool True if the attachment is valid for this user, false otherwise.
      */
     if ( !function_exists( 'wppb_verify_attachment_id' ) ) {
-        function wppb_verify_attachment_id( $attachment_id, $user_id = null ) {
-            if ( $attachment_id !== '' && is_numeric( $attachment_id ) ) {
-                $attachment = get_post( absint( trim( $attachment_id ) ) );
-                if ( $attachment && $attachment->post_type === 'attachment' ) {
-
-                    // Get current user info for admin bypass checks
-                    $current_user_id = get_current_user_id();
-                    $current_user = $current_user_id ? get_userdata( $current_user_id ) : null;
-                    $is_admin = $current_user && current_user_can( 'manage_options' );
-
-                    if ( $user_id ) {
-                        // Allow admins to upload files for users
-                        if ( $is_admin ) {
-                            return true;
-                        }
-                        // The attachment is claimable when it already belongs to the target
-                        // user, or to the user performing the request. An author-less
-                        // attachment (post_author == 0) is only claimable by an
-                        // unauthenticated request (e.g. a visitor registering, whose upload
-                        // has no author yet). This prevents an authenticated user from
-                        // claiming (IDOR) an author-0 attachment created by someone else's
-                        // anonymous/nopriv upload.
-                        if ( $attachment->post_author == $user_id
-                            || ( $current_user_id && $attachment->post_author == $current_user_id )
-                            || ( 0 === (int) $current_user_id && 0 === (int) $attachment->post_author ) ) {
-                            return true;
-                        }
-                    } else {
-                        // If no user ID is provided, check if current user is admin
-                        if ( $is_admin ) {
-                            return true;
-                        }
-                        // Without an explicit target user, an authenticated user may only
-                        // reference an attachment they already own; an author-less
-                        // attachment is only claimable by an unauthenticated request.
-                        if ( ( $current_user_id && $attachment->post_author == $current_user_id )
-                            || ( 0 === (int) $current_user_id && 0 === (int) $attachment->post_author ) ) {
-                            return true;
-                        }
-                    }
-                }
+        function wppb_verify_attachment_id( $attachment_id, $user_id = null, $proof = null ) {
+            if ( $attachment_id === '' || ! is_numeric( $attachment_id ) ) {
+                return false;
             }
-            return false;
+
+            $attachment = get_post( absint( trim( $attachment_id ) ) );
+            if ( ! $attachment || $attachment->post_type !== 'attachment' ) {
+                return false;
+            }
+
+            if ( current_user_can( 'manage_options' ) ) {
+                return true;
+            }
+
+            $author          = (int) $attachment->post_author;
+            $current_user_id = get_current_user_id();
+
+            if ( $author !== 0 ) {
+                return ( $user_id && $author === (int) $user_id ) || ( $current_user_id && $author === $current_user_id );
+            }
+
+            if ( $proof === null ) {
+                $proof = wppb_upload_claim_proof_from_request( $_REQUEST, $attachment->ID );
+            }
+
+            return is_string( $proof ) && hash_equals( wppb_upload_claim_proof( $attachment->ID ), $proof );
         }
     }
 
@@ -531,14 +565,15 @@ function wppb_register_attachment_ownership_helpers() {
      * Validates attachment ownership and updates the user meta and post author.
      * Used for IDOR-safe saving on both Upload and Avatar fields.
      *
-     * @param string|int $attachment_id The attachment post ID.
-     * @param array      $field         The field definition array (must contain 'meta-name').
-     * @param int        $user_id       The user ID to save for.
+     * @param string|int  $attachment_id The attachment post ID.
+     * @param array       $field         The field definition array (must contain 'meta-name').
+     * @param int         $user_id       The user ID to save for.
+     * @param string|null $proof         See wppb_verify_attachment_id().
      */
     if ( !function_exists( 'wppb_save_attachment_id' ) ) {
-        function wppb_save_attachment_id( $attachment_id, $field, $user_id ) {
+        function wppb_save_attachment_id( $attachment_id, $field, $user_id, $proof = null ) {
             // Verify that the attachment either doesn't exist or already belongs to the user
-            if ( wppb_verify_attachment_id( $attachment_id, $user_id ) ) {
+            if ( wppb_verify_attachment_id( $attachment_id, $user_id, $proof ) ) {
                 update_user_meta( $user_id, $field['meta-name'], absint( $attachment_id ) );
                 wp_update_post( array(
                     'ID'          => absint( trim( $attachment_id ) ),

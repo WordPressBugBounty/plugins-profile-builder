@@ -281,6 +281,8 @@ function wppb_add_meta_to_user_on_activation( $user_id, $password, $meta ){
     else if( !empty( $meta['nickname'] ) )
         wp_update_user(array('ID' => $user_id, 'display_name' => $meta['nickname'] ));
 
+	$on_signup_blog = empty( $meta['registered_for_blog_id'] ) || (int) $meta['registered_for_blog_id'] === get_current_blog_id();
+
 	//copy the data from the meta fields (custom fields)
 	$manage_fields = apply_filters( 'wppb_form_fields', get_option( 'wppb_manage_fields', 'not_set' ), array( 'meta' => $meta, 'user_id' => $user_id, 'context' => 'user_activation' ) );
 	if ( $manage_fields != 'not_set' ){
@@ -325,7 +327,7 @@ function wppb_add_meta_to_user_on_activation( $user_id, $password, $meta ){
 					if ( isset( $meta[$value['meta-name']] ) ){
                         if( !empty( $meta[$value['meta-name']] ) ) {
                             if (is_numeric($meta[$value['meta-name']])) {
-                                wppb_save_attachment_id( trim( $meta[$value['meta-name']] ), $value, $user_id );
+                                wppb_save_attachment_id( trim( $meta[$value['meta-name']] ), $value, $user_id, $on_signup_blog ? wppb_upload_claim_proof( $meta[$value['meta-name']] ) : '' );
                             } else {
                                 $wp_upload_array = wp_upload_dir(); // Array of key => value pairs
 
@@ -356,7 +358,7 @@ function wppb_add_meta_to_user_on_activation( $user_id, $password, $meta ){
 					if ( isset( $meta[$value['meta-name']] ) ) {
                         if( !empty( $meta[$value['meta-name']] ) ) {
                             if (is_numeric($meta[$value['meta-name']])) {
-                                wppb_save_attachment_id( trim( $meta[$value['meta-name']] ), $value, $user_id );
+                                wppb_save_attachment_id( trim( $meta[$value['meta-name']] ), $value, $user_id, $on_signup_blog ? wppb_upload_claim_proof( $meta[$value['meta-name']] ) : '' );
                             } else {
                                 $wp_upload_array = wp_upload_dir(); // Array of key => value pairs
 
@@ -487,6 +489,14 @@ function wppb_signup_user( $username, $user_email, $login_after_register, $meta 
 	do_action ( 'wppb_signup_user', $username, $user_email, $activation_key, $meta );
 
 	wppb_signup_user_notification( $username, $user_email, $activation_key, $meta );
+}
+
+function wppb_confirmation_email_recently_sent( $signup ) {
+	return get_transient( 'wppb_confirmation_email_already_sent_' . Wordpress_Creation_Kit_PB::wck_generate_slug( $signup['user_email'] ) ) !== false;
+}
+
+function wppb_mark_confirmation_email_sent( $signup ) {
+	set_transient( 'wppb_confirmation_email_already_sent_' . Wordpress_Creation_Kit_PB::wck_generate_slug( $signup['user_email'] ), true, 900 );
 }
 
 /**

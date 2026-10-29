@@ -14,6 +14,7 @@ class Profile_Builder_Form_Creator{
                             'ID'                    => null
 						);
 	public $args;
+	private $is_ajax_form = false;
 
 
 	// Constructor method for the class
@@ -67,6 +68,7 @@ class Profile_Builder_Form_Creator{
         if( defined( 'WPPB_PAID_PLUGIN_DIR' ) && isset( $this->args['ajax'] ) && $this->args['ajax'] === 'true' && file_exists( WPPB_PAID_PLUGIN_DIR . '/features/ajax/assets/forms-ajax-validation.js' ) ) {
             wp_enqueue_script( 'wppb-forms-ajax-validation-script', WPPB_PAID_PLUGIN_URL . 'features/ajax/assets/forms-ajax-validation.js', array( 'jquery' ), PROFILE_BUILDER_VERSION, true );
             wp_localize_script( 'wppb-forms-ajax-validation-script', 'submitButtonData', array( 'processingText' => __( 'Processing...', 'profile-builder' ) ) );
+            $this->is_ajax_form = true;
 
             // AJAX validation re-renders the form and needs editor assets only when a WYSIWYG field must be reinitialized
             if( apply_filters( 'wppb_ajax_form_should_enqueue_editor', $this->wppb_form_has_wysiwyg_field( $this->args['form_fields'] ), $this->args, $this ) )
@@ -377,10 +379,13 @@ class Profile_Builder_Form_Creator{
 			$field_check_errors = $this->wppb_test_required_form_values( $_REQUEST );
 			if( empty( $field_check_errors ) ) {
 
-                do_action( 'wppb_before_saving_form_values',$_REQUEST, $this->args );
+                $validated_args = $this->args;
+                $validated_args['form_fields'] = $this->wppb_restrict_fields_to_validated( $_REQUEST );
+
+                do_action( 'wppb_before_saving_form_values',$_REQUEST, $validated_args );
 
 				// we only have a $user_id on default registration (no email confirmation, no multisite)
-				$user_id = $this->wppb_save_form_values( $_REQUEST );
+				$user_id = $this->wppb_save_form_values( $_REQUEST, $validated_args );
 
                 do_action( 'wppb_after_saving_form_values',$_REQUEST, $this->args );
 
@@ -521,7 +526,7 @@ class Profile_Builder_Form_Creator{
         $wppb_form_class .= $wppb_user_role_class;
 
         ?>
-        <form enctype="multipart/form-data" method="post" novalidate id="<?php echo esc_attr( apply_filters( 'wppb_form_id', $wppb_form_id, $this ) ); ?>" class="<?php echo esc_attr( apply_filters( 'wppb_form_class', $wppb_form_class, $this ) ) . ( $this->args['ajax'] == 'true' ? ' wppb-ajax-form' : ''); ?>" action="<?php echo esc_url( apply_filters( 'wppb_form_action', wppb_curpageurl(), $this->args ) ); ?>">
+        <form enctype="multipart/form-data" method="post" novalidate id="<?php echo esc_attr( apply_filters( 'wppb_form_id', $wppb_form_id, $this ) ); ?>" class="<?php echo esc_attr( apply_filters( 'wppb_form_class', $wppb_form_class, $this ) ) . ( $this->is_ajax_form ? ' wppb-ajax-form' : '' ); ?>" action="<?php echo esc_url( apply_filters( 'wppb_form_action', wppb_curpageurl(), $this->args ) ); ?>">
 			<?php
             do_action( 'wppb_form_args_before_output', $this->args );
             $this->args = apply_filters( 'wppb_filter_form_args_before_output', $this->args );
@@ -636,7 +641,7 @@ class Profile_Builder_Form_Creator{
 
 	function wppb_test_required_form_values( $global_request ){
 		$output_field_errors = array();
-        $form_fields = apply_filters( 'wppb_form_fields', $this->args['form_fields'], array( 'global_request' => $global_request, 'context' => 'validate_frontend', 'form_type' => $this->args['form_type'], 'role' => $this->args['role'], 'user_id' => $this->wppb_get_desired_user_id()  ) );
+        $form_fields = $this->wppb_get_fields_to_validate( $global_request );
 		if( !empty( $form_fields ) ){
 			foreach( $form_fields as $field ){
 				$error_for_field = apply_filters( 'wppb_check_form_field_'.Wordpress_Creation_Kit_PB::wck_generate_slug( $field['field'] ), '', $field, $global_request, $this->args['form_type'], $this->args['role'], $this->wppb_get_desired_user_id() );
@@ -649,9 +654,45 @@ class Profile_Builder_Form_Creator{
 		return apply_filters( 'wppb_output_field_errors_filter', $output_field_errors, $this->args['form_fields'], $global_request, $this->args['form_type'] );
 	}
 
-	function wppb_save_form_values( $global_request ){
+	function wppb_get_fields_to_validate( $global_request ){
+		return apply_filters( 'wppb_form_fields', $this->args['form_fields'], array( 'global_request' => $global_request, 'context' => 'validate_frontend', 'form_type' => $this->args['form_type'], 'role' => $this->args['role'], 'user_id' => $this->wppb_get_desired_user_id() ) );
+	}
+
+	static function wppb_keep_validated_fields( $form_fields, $validated_fields ){
+		$validated_ids = array();
+		if( is_array( $validated_fields ) ){
+			foreach( $validated_fields as $validated_field ){
+				if( isset( $validated_field['id'] ) )
+					$validated_ids[] = (string) $validated_field['id'];
+			}
+		}
+
+		$restricted_fields = array();
+		foreach( $form_fields as $field ){
+			if( isset( $field['id'] ) && in_array( (string) $field['id'], $validated_ids, true ) )
+				$restricted_fields[] = $field;
+		}
+
+		return $restricted_fields;
+	}
+
+	function wppb_restrict_fields_to_validated( $global_request ){
+		$form_fields = $this->args['form_fields'];
+		if( empty( $form_fields ) )
+			return $form_fields;
+
+		return self::wppb_keep_validated_fields( $form_fields, $this->wppb_get_fields_to_validate( $global_request ) );
+	}
+
+	function wppb_save_form_values( $global_request, $save_args = null ){
 		$user_id = $this->wppb_get_desired_user_id();
-		$userdata = apply_filters( 'wppb_build_userdata', array(), $global_request, $this->args );
+
+		if( $save_args === null ){
+			$save_args = $this->args;
+			$save_args['form_fields'] = $this->wppb_restrict_fields_to_validated( $global_request );
+		}
+
+		$userdata = apply_filters( 'wppb_build_userdata', array(), $global_request, $save_args );
 		$new_user_signup = false;
 
         $wppb_general_settings = get_option( 'wppb_general_settings' );
@@ -695,8 +736,8 @@ class Profile_Builder_Form_Creator{
 			wp_update_user( $userdata );
 		}
 
-		if( !empty( $this->args['form_fields'] ) && !$new_user_signup ){
-			foreach( $this->args['form_fields'] as $field ){
+		if( !empty( $save_args['form_fields'] ) && !$new_user_signup ){
+			foreach( $save_args['form_fields'] as $field ){
                 if( apply_filters( 'wppb_pre_save_form_field', true, $field, $user_id, $global_request, $this->args['form_type'] ) )
 				    do_action( 'wppb_save_form_field', $field, $user_id, $global_request, $this->args['form_type'] );
 			}
@@ -816,7 +857,7 @@ class Profile_Builder_Form_Creator{
      */
 	function wppb_get_desired_user_id(){
 		if( $this->args['form_type'] == 'edit_profile' ){
-			if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( $_GET['edit_user'] ) ){
+			if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( absint( $_GET['edit_user'] ) ) ){
 				return absint( $_GET['edit_user'] );
 			}
 		}
@@ -835,7 +876,7 @@ class Profile_Builder_Form_Creator{
         if( $user_count['total_users'] > apply_filters( 'wppb_edit_other_users_count_limit', 5000 ) )
             return;
 
-        if( isset( $_GET['edit_user'] ) && ! empty( $_GET['edit_user'] ) )
+        if( ! empty( $_GET['edit_user'] ) && wppb_current_user_can_edit_other_user( absint( $_GET['edit_user'] ) ) )
             $selected = absint( $_GET['edit_user'] );
         else
             $selected = get_current_user_id();

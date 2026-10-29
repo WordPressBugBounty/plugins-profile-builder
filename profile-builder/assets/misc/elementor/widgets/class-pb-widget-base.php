@@ -33,7 +33,7 @@ abstract class PB_Elementor_Widget extends \Elementor\Widget_Base {
         $this->start_controls_section(
             $id_prefix.'_style_section',
             [
-                'label'     => $section_label === '' ? __( 'Unlabelled Field', 'profile-builder' ) : $section_label,
+                'label'     => $section_label === '' ? __( 'Unlabelled Field', 'profile-builder' ) : wp_kses_post( $section_label ),
                 'tab'       => Controls_Manager::TAB_STYLE,
                 'condition' => $condition,
             ]
@@ -271,7 +271,7 @@ abstract class PB_Elementor_Widget extends \Elementor\Widget_Base {
         $all_pages = get_posts( $args );
         if( !empty( $all_pages ) ){
             foreach ( $all_pages as $page ){
-                $page_titles[$page->ID] = $page->post_title;
+                $page_titles[$page->ID] = esc_html( $page->post_title );
             }
         }
         return $page_titles;

@@ -376,10 +376,13 @@ function wppb_admin_email_customizer_epaa_content_filter_handler ( $default, $us
 
     if( $email_customizer_option != 'not_found' && class_exists( 'PB_Mustache_Generate_Template' ) && !empty( $user_id ) ) {
         $user_info = get_user_by( 'id', $user_id );
+
+        $email_customizer_option = preg_replace( '/(?<!\{)\{\{\s*modified_fields\s*\}\}(?!\})/', '{{{modified_fields}}}', $email_customizer_option );
+
         $email_content = (string) new PB_Mustache_Generate_Template( wppb_email_customizer_generate_merge_tags( 'epaa_notification_admin' ), $email_customizer_option, array( 'user_login' => $user_info->data->user_login, 'user_email' => $user_info->data->user_email, 'user_id' => $user_info->data->ID, 'modified_fields' => $fields, 'approval_url' => $approve_url ) );
 
         wppb_change_email_from_headers();
-        return html_entity_decode( htmlspecialchars_decode( $email_content, ENT_QUOTES ), ENT_QUOTES );
+        return $email_content;
     }
 
     return $default;

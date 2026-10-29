@@ -1667,7 +1667,7 @@ function wppb_get_map_output( $field, $args ) {
 				$return .= $bubble;
 			}
 
-			$return .= '<input name="' . $field['meta-name'] . '[]" type="hidden" class="wppb-map-marker" value="' . $marker . '" />';
+			$return .= '<input name="' . esc_attr( $field['meta-name'] ) . '[]" type="hidden" class="wppb-map-marker" value="' . esc_attr( $marker ) . '" />';
 		}
 	}
 

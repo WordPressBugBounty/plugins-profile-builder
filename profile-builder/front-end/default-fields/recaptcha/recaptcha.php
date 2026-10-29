@@ -176,7 +176,7 @@ function wppb_recaptcha_script_footer(){
                         }
 
                         // Listen for PB-Form submission
-                        jQuery(currentForm).on("submit.wppbRecaptchaV3", wppbInitializeRecaptchaV3);
+                        jQuery(currentForm).off("submit.wppbRecaptchaV3").on("submit.wppbRecaptchaV3", wppbInitializeRecaptchaV3);
                     });
                     window.wppbRecaptchaCallbackExecuted = true;//we use this to make sure we only run the callback once
 
@@ -200,10 +200,15 @@ function wppb_recaptcha_script_footer(){
                     currentForm = current_form[0]
                 }
 
+                // Wait for the 2FA check. It submits the form again when no code is needed, and a 2FA user clicks again with the code
+                if( currentForm.classList.contains("wppb-2fa-form") && !currentForm.classList.contains("wppb-2fa-authentication-requested") && !currentForm.classList.contains("wppb-ajax-form") ){
+                    return;
+                }
+
                 return new Promise((resolve) => {
 
                     grecaptcha.ready(function() {
-                        grecaptcha.execute("' . $pubkey . '", {action: "submit"}).then(function(token) {
+                        grecaptcha.execute("' . esc_js( $pubkey ) . '", {action: "submit"}).then(function(token) {
                         
                             let recaptchaResponse = jQuery(currentForm).find(".wppb-v3-recaptcha.g-recaptcha-response");
                             jQuery(recaptchaResponse).val(token); // Set the recaptcha response
@@ -215,22 +220,21 @@ function wppb_recaptcha_script_footer(){
                             var submitForm = true
                     
                             /* dont submit form if PMS gateway is Stripe */
-                            if( jQuery(".pms_pay_gate[type=radio]").length > 0 ){
-                                jQuery(".pms_pay_gate").each( function(){
+                            if( jQuery(".pms_pay_gate[type=radio]", currentForm).length > 0 ){
+                                jQuery(".pms_pay_gate", currentForm).each( function(){
                                     if( jQuery(this).is(":checked") && !jQuery(this).is(":disabled") && ( jQuery(this).val() == "stripe_connect" || jQuery(this).val() == "stripe_intents" || jQuery(this).val() == "stripe" || jQuery(this).val() == "paypal_connect" ) )
                                         submitForm = false
                                 })
-                            } else if( jQuery(".pms_pay_gate[type=hidden]").length > 0 ) {
+                            } else if( jQuery(".pms_pay_gate[type=hidden]", currentForm).length > 0 ) {
                     
-                                if( !jQuery(".pms_pay_gate[type=hidden]").is(":disabled") && ( jQuery(".pms_pay_gate[type=hidden]").val() == "stripe_connect" || jQuery(".pms_pay_gate[type=hidden]").val() == "stripe_intents" || jQuery(".pms_pay_gate[type=hidden]").val() == "stripe" || jQuery(".pms_pay_gate[type=hidden]").val() == "paypal_connect" ) )
+                                if( !jQuery(".pms_pay_gate[type=hidden]", currentForm).is(":disabled") && ( jQuery(".pms_pay_gate[type=hidden]", currentForm).val() == "stripe_connect" || jQuery(".pms_pay_gate[type=hidden]", currentForm).val() == "stripe_intents" || jQuery(".pms_pay_gate[type=hidden]", currentForm).val() == "stripe" || jQuery(".pms_pay_gate[type=hidden]", currentForm).val() == "paypal_connect" ) )
                                     submitForm = false
                             } else if( currentForm.classList.contains("wppb-ajax-form") ) {
-                                submitForm = false;                                    
-                            } else if( currentForm.classList.contains("wppb-2fa-form") ) {
                                 submitForm = false;
                             }
 
-                            if( currentForm.classList.contains("wppb-2fa-authentication-requested" ) ){
+                            // On AJAX forms the AJAX form handler sends the login, also after the 2FA check
+                            if( currentForm.classList.contains("wppb-2fa-authentication-requested" ) && !currentForm.classList.contains("wppb-ajax-form") ){
                                 submitForm = true;
                             }
 
@@ -284,7 +288,7 @@ function wppb_recaptcha_script_footer(){
                             var recID = grecaptcha.render(
                                 $recaptchaElement.attr("id"),
                                 {
-                                    "sitekey" : "' . $pubkey . '",
+                                    "sitekey" : "' . esc_js( $pubkey ) . '",
                                     "error-callback": wppbRecaptchaInitializationError,
                                     ' . $invisible_parameters . '
                                 }
@@ -350,14 +354,14 @@ function wppb_recaptcha_script_footer(){
                 var submitForm = true
 
                 /* dont submit form if PMS gateway is Stripe */
-                if( jQuery(".pms_pay_gate[type=radio]").length > 0 ){
-                    jQuery(".pms_pay_gate").each( function(){
+                if( jQuery(".pms_pay_gate[type=radio]", form).length > 0 ){
+                    jQuery(".pms_pay_gate", form).each( function(){
                         if( jQuery(this).is(":checked") && !jQuery(this).is(":disabled") && ( jQuery(this).val() == "stripe_connect" || jQuery(this).val() == "stripe_intents" || jQuery(this).val() == "stripe" || jQuery(this).val() == "paypal_connect" ) )
                             submitForm = false
                     })
-                } else if( jQuery(".pms_pay_gate[type=hidden]").length > 0 ) {
+                } else if( jQuery(".pms_pay_gate[type=hidden]", form).length > 0 ) {
 
-                    if( !jQuery(".pms_pay_gate[type=hidden]").is(":disabled") && ( jQuery(".pms_pay_gate[type=hidden]").val() == "stripe_connect" || jQuery(".pms_pay_gate[type=hidden]").val() == "stripe_intents" || jQuery(".pms_pay_gate[type=hidden]").val() == "stripe" || jQuery(".pms_pay_gate[type=hidden]").val() == "paypal_connect" ) )
+                    if( !jQuery(".pms_pay_gate[type=hidden]", form).is(":disabled") && ( jQuery(".pms_pay_gate[type=hidden]", form).val() == "stripe_connect" || jQuery(".pms_pay_gate[type=hidden]", form).val() == "stripe_intents" || jQuery(".pms_pay_gate[type=hidden]", form).val() == "stripe" || jQuery(".pms_pay_gate[type=hidden]", form).val() == "paypal_connect" ) )
                         submitForm = false
                                  
                 } else if( form.hasClass("wppb-ajax-form") ) {
@@ -619,7 +623,27 @@ function wppb_get_recaptcha_field(){
             }
         }
     }
+
+    if ( !empty( $field['captcha-wp-forms'] ) && function_exists( 'pms_recaptcha_is_enabled_on_form' ) ) {
+        $wp_forms = array_map( 'trim', explode( ',', $field['captcha-wp-forms'] ) );
+        $field['captcha-wp-forms'] = implode( ',', array_filter( $wp_forms, function( $form ) { return !pms_recaptcha_is_enabled_on_form( $form ); } ) );
+    }
+
     return $field;
+}
+
+/*
+ * Every Recover Password reCAPTCHA display and validation asks this, so the rendered form and the server check can't disagree.
+ * The request is processed inside the form's own shortcode, so get_the_ID() is the same page on both sides.
+ */
+function wppb_recover_password_recaptcha_required( $field ) {
+    if ( empty( $field ) || ! isset( $field['captcha-pb-forms'] ) )
+        return false;
+
+    if ( strpos( $field['captcha-pb-forms'], 'pb_recover_password' ) !== false )
+        return true;
+
+    return $field['recaptcha-type'] == 'v3' && wppb_maybe_enable_recaptcha_v3_on_form( $field );
 }
 
 /* Display reCAPTCHA on PB Recover Password form */
@@ -632,7 +656,7 @@ function wppb_display_recaptcha_recover_password( $output ){
         $item_description = wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_description_translation', $field['description'], true);
 
         // check where reCAPTCHA should display and add reCAPTCHA html
-        if ( isset($field['captcha-pb-forms']) && ( strpos( $field['captcha-pb-forms'],'pb_recover_password' ) !== false || ( $field['recaptcha-type'] == 'v3' && wppb_maybe_enable_recaptcha_v3_on_form( $field ) ) ) ) {
+        if ( wppb_recover_password_recaptcha_required( $field ) ) {
 
             global $wppb_recaptcha_present;
             $wppb_recaptcha_present = true;
@@ -659,16 +683,14 @@ function wppb_recaptcha_change_recover_password_message_no($messageNo) {
 
         if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'recover_password') {
             $field = wppb_get_recaptcha_field();
-            if (!empty($field)) {
+            // only verify when reCAPTCHA is enabled on this form, the token is single use (see wppb_recaptcha_login_wp_error_message)
+            if ( wppb_recover_password_recaptcha_required( $field ) ) {
 
                 global $wppb_recaptcha_response;
                 if (!isset($wppb_recaptcha_response)) $wppb_recaptcha_response = wppb_validate_captcha_response( trim( $field['public-key'] ), trim( $field['private-key'] ), isset( $field['score-threshold'] ) ? trim( $field['score-threshold'] ) : 0.5 );
 
-                if ( isset($field['captcha-pb-forms']) && (strpos($field['captcha-pb-forms'], 'pb_recover_password') !== false) ) {
-
-                    if ( $wppb_recaptcha_response == false )
-                        $messageNo = '';
-                }
+                if ( $wppb_recaptcha_response == false )
+                    $messageNo = '';
             }
         }
 
@@ -680,11 +702,12 @@ add_filter('wppb_recover_password_message_no', 'wppb_recaptcha_change_recover_pa
 function wppb_recaptcha_recover_password_displayed_message1( $message ) {
     $field = wppb_get_recaptcha_field();
 
-    if ( !empty($field) ){
+    // only verify when reCAPTCHA is enabled on this form, the token is single use (see wppb_recaptcha_login_wp_error_message)
+    if ( wppb_recover_password_recaptcha_required( $field ) ){
         global $wppb_recaptcha_response;
         if (!isset($wppb_recaptcha_response)) $wppb_recaptcha_response = wppb_validate_captcha_response( trim( $field['public-key'] ), trim( $field['private-key'] ), isset( $field['score-threshold'] ) ? trim( $field['score-threshold'] ) : 0.5 );
 
-        if ( isset($field['captcha-pb-forms']) && ( strpos( $field['captcha-pb-forms'],'pb_recover_password' ) !== false ) && ( $wppb_recaptcha_response == false )) {
+        if ( $wppb_recaptcha_response == false ) {
 
             // This message is also altered by the plugin-compatibilities.php file, in regards to Captcha plugin ( function wppb_captcha_recover_password_displayed_message1 )
             // compare only the text, the warning markup can carry extra attributes (e.g. role="alert")
@@ -707,11 +730,12 @@ function wppb_recaptcha_recover_password_sent_message_1($message) {
         if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'recover_password') {
             $field = wppb_get_recaptcha_field();
 
-            if (!empty($field)) {
+            // only verify when reCAPTCHA is enabled on this form, the token is single use (see wppb_recaptcha_login_wp_error_message)
+            if ( wppb_recover_password_recaptcha_required( $field ) ) {
                 global $wppb_recaptcha_response;
                 if (!isset($wppb_recaptcha_response)) $wppb_recaptcha_response = wppb_validate_captcha_response( trim( $field['public-key'] ), trim( $field['private-key'] ), isset( $field['score-threshold'] ) ? trim( $field['score-threshold'] ) : 0.5 );
 
-                if ( isset($field['captcha-pb-forms']) && ( strpos($field['captcha-pb-forms'], 'pb_recover_password') !== false ) && ( $wppb_recaptcha_response == false ) ){
+                if ( $wppb_recaptcha_response == false ){
                     $message = 'wppb_recaptcha_error';
                 }
             }
@@ -734,7 +758,7 @@ function wppb_display_recaptcha_login_form($form_part, $args) {
         $item_title = apply_filters('wppb_login_recaptcha_custom_field_' . $field['id'] . '_item_title', wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_title_translation', $field['field-title'], true));
         $item_description = wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_description_translation', $field['description'], true);
 
-        if ( isset($field['captcha-pb-forms']) && ( strpos( $field['captcha-pb-forms'],'pb_login' ) !== false || ( $field['recaptcha-type'] == 'v3' && wppb_maybe_enable_recaptcha_v3_on_form( $field ) ) ) ) { // check where reCAPTCHA should display and add reCAPTCHA html
+        if ( wppb_login_captcha_required( 'reCAPTCHA', 'pb_login' ) ) {
 
             global $wppb_recaptcha_present;
             $wppb_recaptcha_present = true;
@@ -766,7 +790,7 @@ function wppb_display_recaptcha_wp_login_form(){
         $item_title = apply_filters('wppb_login_recaptcha_custom_field_' . $field['id'] . '_item_title', wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_title_translation', $field['field-title'], true));
         $item_description = wppb_icl_t('plugin profile-builder-pro', 'custom_field_' . $field['id'] . '_description_translation', $field['description'], true);
 
-        if ( isset($field['captcha-wp-forms']) && (strpos( $field['captcha-wp-forms'],'default_wp_login' ) !== false) ) { // check where reCAPTCHA should display and add reCAPTCHA html
+        if ( wppb_login_captcha_required( 'reCAPTCHA', 'default_wp_login' ) ) {
 
             global $wppb_recaptcha_present;
             $wppb_recaptcha_present = true;
@@ -789,8 +813,10 @@ add_action( 'login_form', 'wppb_display_recaptcha_wp_login_form' );
 
 //Show reCAPTCHA error on Login form (both default and PB one)
 function wppb_recaptcha_login_wp_error_message($user){
+    $form = wppb_submitted_login_form();
+
     //make sure you're on a Login form (WP or PB)
-    if ( isset( $_POST['log'] ) && !is_wp_error($user) && !isset( $_POST['pms_login'] ) ) {
+    if ( isset( $_POST['log'] ) && !is_wp_error($user) && $form != 'pms_login' ) {
 
         $field = wppb_get_recaptcha_field();
         if ( !empty($field) ){
@@ -798,16 +824,7 @@ function wppb_recaptcha_login_wp_error_message($user){
             anything. The token is single use, so verifying it on a form where our widget was never displayed
             spends a token that belongs to whatever else protects that form, and that plugin's own check
             then fails as a duplicate. */
-            if ( isset($_POST['wppb_login']) && ($_POST['wppb_login'] == true) ) {
-                // it's a PB login form, check if we have a reCAPTCHA on it
-                $recaptcha_enabled = ( isset($field['captcha-pb-forms']) && ( strpos($field['captcha-pb-forms'], 'pb_login') !== false || ( $field['recaptcha-type'] == 'v3' && wppb_maybe_enable_recaptcha_v3_on_form( $field ) ) ) );
-            }
-            else {
-                // default WP login form
-                $recaptcha_enabled = ( isset($field['captcha-wp-forms']) && (strpos($field['captcha-wp-forms'], 'default_wp_login') !== false) );
-            }
-
-            if ( $recaptcha_enabled ) {
+            if ( wppb_login_captcha_required( 'reCAPTCHA', $form ) ) {
                 global $wppb_recaptcha_response;
 
                 if (!isset($wppb_recaptcha_response)) $wppb_recaptcha_response = wppb_validate_captcha_response( trim( $field['public-key'] ), trim( $field['private-key'] ), isset( $field['score-threshold'] ) ? trim( $field['score-threshold'] ) : 0.5 );
@@ -1092,7 +1109,7 @@ function wppb_check_recaptcha_fields_settings( $values ) {
 }
 add_action( 'wck_update_meta_filter_values_wppb_manage_fields', 'wppb_check_recaptcha_fields_settings' );
 
-function wppb_maybe_enable_recaptcha_v3_on_form( $recaptcha_field ){
+function wppb_maybe_enable_recaptcha_v3_on_form( $recaptcha_field, $post_id = null ){
 
     // Static cache to avoid repeated calculations
     static $cache = array();
@@ -1101,8 +1118,14 @@ function wppb_maybe_enable_recaptcha_v3_on_form( $recaptcha_field ){
     if( empty( $recaptcha_field ) || empty( $recaptcha_field['captcha-pb-forms'] ) )
         return false;
 
-    $post_id = get_the_ID();
-    $post    = get_post( $post_id );
+    if( $post_id === null )
+        $post_id = get_the_ID();
+
+    // get_post() would fall back to the global post, which is not the page that was asked about
+    if( empty( $post_id ) )
+        return false;
+
+    $post = get_post( $post_id );
 
     // Check if post is set, if not return false
     if( empty( $post ) || empty( $post->post_content ) )
@@ -1152,12 +1175,12 @@ function wppb_maybe_enable_recaptcha_v3_on_form( $recaptcha_field ){
             continue;
 
         // Check if current form type exists on the page
-        $current_form_exists = ( strpos( $post->post_content, $config['shortcode_pattern'] ) !== false || has_block( $config['block_name'] ) );
+        $current_form_exists = ( strpos( $post->post_content, $config['shortcode_pattern'] ) !== false || has_block( $config['block_name'], $post ) );
         
         if( $current_form_exists ) {
             // Check if any other enabled form types also exist on the page
             foreach( $config['other_forms'] as $other_form ) {
-                $other_form_exists = ( strpos( $post->post_content, $other_form['shortcode'] ) !== false || has_block( $other_form['block'] ) );
+                $other_form_exists = ( strpos( $post->post_content, $other_form['shortcode'] ) !== false || has_block( $other_form['block'], $post ) );
                 $other_form_enabled = ( strpos( $recaptcha_field['captcha-pb-forms'], $other_form['form_type'] ) !== false );
                 
                 if( $other_form_exists && $other_form_enabled ) {

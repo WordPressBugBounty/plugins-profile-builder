@@ -28,8 +28,14 @@ function wppb_toolbox_resend_activation_url_handler() {
  		$sql_result = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM " . $wpdb->base_prefix . "signups WHERE user_email = %s", sanitize_email( $_REQUEST['email'] ) ), ARRAY_A );
 
  		if ( $sql_result ){
- 			wppb_signup_user_notification( trim( $sql_result['user_login'] ), trim( $sql_result['user_email'] ), $sql_result['activation_key'], $sql_result['meta'] );
- 			echo '<script> alert("'. esc_html__( 'Activation email sent!', 'profile-builder' ) .'");</script>';
+ 			if ( ! wppb_confirmation_email_recently_sent( $sql_result ) ) {
+ 				wppb_mark_confirmation_email_sent( $sql_result );
+ 				wppb_signup_user_notification( trim( $sql_result['user_login'] ), trim( $sql_result['user_email'] ), $sql_result['activation_key'], $sql_result['meta'] );
+ 				echo '<script> alert("'. esc_html__( 'Activation email sent!', 'profile-builder' ) .'");</script>';
+ 			}
+ 			else {
+ 				echo '<script> alert("'. esc_html__( 'An activation email was already sent recently. Please check your inbox or try again later.', 'profile-builder' ) .'");</script>';
+ 			}
  		}
  		else {
  			echo '<script> alert("'. esc_html__( 'No sign-up was made with that email!', 'profile-builder' ) .'");</script>';
